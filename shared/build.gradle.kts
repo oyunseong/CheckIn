@@ -8,6 +8,7 @@ plugins {
     alias(libs.plugins.androidLibrary)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.kotlinxSerialization)
 }
 
 kotlin {
@@ -49,7 +50,34 @@ kotlin {
             implementation(compose.foundation)
             implementation(compose.material3)
             implementation(libs.koin.core)
+
+
+            // ✅ Decompose core (필수)
+            implementation(libs.arkivanov.decompose.core)
+
+            // ✅ Compose Multiplatform에서 Decompose 사용
+            implementation(libs.arkivanov.decompose.extensions.compose)
+
+//            implementation(libs.arkivanov.decompose.extensions.compose)
+//            //arkivanov-decompose-jetpack-component-context
+//            implementation(libs.arkivanov.decompose.jetpack.component.context)
+            implementation(libs.arkivanov.essenty.lifecycle)
+            implementation(libs.arkivanov.essenty.back.handler)
+            implementation(libs.arkivanov.essenty.instance.keeper)
+            implementation(libs.arkivanov.essenty.state.keeper)
+
         }
+
+        androidMain.dependencies{
+
+
+            // ✅ Android에서 Decompose + Jetpack Compose 연동
+//            implementation(libs.arkivanov.decompose.extensions.compose.jetpack)
+
+             implementation(libs.arkivanov.decompose.core)
+//             implementation(libs.arkivanov.decompose.extensions.compose)
+        }
+
         commonTest.dependencies {
             implementation(libs.kotlin.test)
         }

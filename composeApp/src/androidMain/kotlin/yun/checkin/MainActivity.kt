@@ -1,12 +1,11 @@
 package yun.checkin
 
+import DefaultRootComponent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.tooling.preview.Preview
-
+import com.arkivanov.decompose.defaultComponentContext
 import yun.checkin.shared.di.initKoin
 
 class MainActivity : ComponentActivity() {
@@ -15,15 +14,13 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         initKoin()
+        val root =
+            DefaultRootComponent(
+                componentContext = defaultComponentContext()
+            )
 
         setContent {
-            App()
+            App(root)
         }
     }
-}
-
-@Preview
-@Composable
-fun AppAndroidPreview() {
-    App()
 }

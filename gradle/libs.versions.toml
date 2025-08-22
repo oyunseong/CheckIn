@@ -16,7 +16,10 @@ kotlin = "2.2.10"
 kotlinx-coroutines = "1.10.2"
 ktor = "3.2.3"
 logback = "1.5.18"
-koin ="4.1.0"
+koin = "4.1.0"
+decompose = "3.4.0-alpha03"
+essenty = "2.5.0"
+kotlinx-serialization = "1.9.0"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -37,6 +40,19 @@ ktor-serverTestHost = { module = "io.ktor:ktor-server-test-host-jvm", version.re
 koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
 koin-android = { module = "io.insert-koin:koin-android", version.ref = "koin" }
 koin-compose = { module = "io.insert-koin:koin-compose", version.ref = "koin" }
+arkivanov-essenty-state-keeper = { module = "com.arkivanov.essenty:state-keeper", version.ref = "essenty" }
+arkivanov-essenty-instance-keeper = { module = "com.arkivanov.essenty:instance-keeper", version.ref = "essenty" }
+arkivanov-essenty-back-handler = { module = "com.arkivanov.essenty:back-handler", version.ref = "essenty" }
+arkivanov-essenty-lifecycle = { module = "com.arkivanov.essenty:lifecycle", version.ref = "essenty" }
+#arkivanov-decompose-extensions-compose = { module = "com.arkivanov.decompose:extensions-compose", version.ref = "decompose" }
+#arkivanov-decompose-jetpack-component-context = { module = "com.arkivanov.decompose:jetpack-component-context", version.ref = "decompose" }
+#arkivanov-decompose-android-compose = { module = "com.arkivanov.decompose:decompose", version.ref = "decompose" }
+arkivanov-decompose-core = { module = "com.arkivanov.decompose:decompose", version.ref = "decompose" }
+arkivanov-decompose-extensions-compose = { module = "com.arkivanov.decompose:extensions-compose", version.ref = "decompose" }
+arkivanov-decompose-extensions-compose-jetpack = { module = "com.arkivanov.decompose:extensions-compose-jetpack", version.ref = "decompose" }
+arkivanov-decompose-extensions-compose-jetpack-context = { module = "com.arkivanov.decompose:jetpack-component-context", version.ref = "decompose" }
+
+
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
@@ -47,3 +63,4 @@ composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "k
 kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 ktor = { id = "io.ktor.plugin", version.ref = "ktor" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+kotlinxSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }

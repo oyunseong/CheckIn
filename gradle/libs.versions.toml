@@ -20,6 +20,7 @@ koin = "4.1.0"
 decompose = "3.4.0-alpha03"
 essenty = "2.5.0"
 kotlinx-serialization = "1.9.0"
+compose-material-icon-extended-version="1.7.3"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -51,6 +52,8 @@ arkivanov-decompose-core = { module = "com.arkivanov.decompose:decompose", versi
 arkivanov-decompose-extensions-compose = { module = "com.arkivanov.decompose:extensions-compose", version.ref = "decompose" }
 arkivanov-decompose-extensions-compose-jetpack = { module = "com.arkivanov.decompose:extensions-compose-jetpack", version.ref = "decompose" }
 arkivanov-decompose-extensions-compose-jetpack-context = { module = "com.arkivanov.decompose:jetpack-component-context", version.ref = "decompose" }
+#compose-material-iconsExtended = { module = "org.jetbrains.compose.material3:material-icons-extended", version.ref = "composeMultiplatform" }
+compose-material-icons-extended = { module = "org.jetbrains.compose.material:material-icons-extended", version.ref = "compose-material-icon-extended-version" }
 
 
 

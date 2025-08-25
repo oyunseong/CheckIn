@@ -1,6 +1,7 @@
 package yun.checkin
 
-import DefaultRootComponent
+import yun.checkin.shared.root.DefaultRootComponent
+import yun.checkin.shared.root.RootComponent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent

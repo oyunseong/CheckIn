@@ -71,6 +71,8 @@ kotlin {
             implementation(libs.androidx.lifecycle.runtimeCompose)
             implementation(projects.shared)
             implementation(libs.koin.compose)
+            implementation(libs.arkivanov.decompose.core)
+            implementation(libs.arkivanov.decompose.extensions.compose)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

@@ -65,7 +65,7 @@ kotlin {
             implementation(libs.arkivanov.essenty.back.handler)
             implementation(libs.arkivanov.essenty.instance.keeper)
             implementation(libs.arkivanov.essenty.state.keeper)
-
+            implementation(libs.compose.material.icons.extended)
         }
 
         androidMain.dependencies{

@@ -1,28 +1,24 @@
-import yun.checkin.shared.home.DefaultHomeComponent
-import yun.checkin.shared.home.HomeComponent
-import yun.checkin.shared.root.DefaultListComponent
-import yun.checkin.shared.root.ListComponent
+package yun.checkin.shared.root
+
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.router.stack.StackNavigation
 import com.arkivanov.decompose.router.stack.childStack
-import com.arkivanov.decompose.router.stack.pop
-import com.arkivanov.decompose.router.stack.popTo
-import com.arkivanov.decompose.router.stack.push
+import com.arkivanov.decompose.router.stack.replaceAll
 import com.arkivanov.decompose.value.Value
 import kotlinx.serialization.Serializable
+import yun.checkin.shared.ui.login.DefaultLoginComponent
+import yun.checkin.shared.ui.login.LoginComponent
+import yun.checkin.shared.main.DefaultMainComponent
+import yun.checkin.shared.main.MainComponent
 
 interface RootComponent {
 
     val stack: Value<ChildStack<*, Child>>
 
-    // It's possible to pop multiple screens at a time on iOS
-    fun onBackClicked(toIndex: Int)
-
-    // Defines all possible child components
     sealed class Child {
-        class ListChild(val component: ListComponent) : Child()
-        class DetailsChild(val component: HomeComponent) : Child()
+        data class Login(val component: LoginComponent) : Child()
+        data class Main(val component: MainComponent) : Child()
     }
 }
 
@@ -36,47 +32,34 @@ class DefaultRootComponent(
         childStack(
             source = navigation,
             serializer = Config.serializer(),
-            initialConfiguration = Config.List, // The initial child component is List
-            handleBackButton = true, // Automatically pop from the stack on back button presses
-            childFactory = ::child,
+            initialConfiguration = Config.Login,
+            handleBackButton = true,
+            childFactory = ::createChild,
         )
 
-    private fun child(config: Config, componentContext: ComponentContext): RootComponent.Child =
+    private fun createChild(config: Config, componentContext: ComponentContext): RootComponent.Child =
         when (config) {
-            is Config.List -> RootComponent.Child.ListChild(listComponent(componentContext))
-            is Config.Details -> RootComponent.Child.DetailsChild(
-                detailsComponent(
-                    componentContext,
-                    config
-                )
-            )
+            is Config.Login -> RootComponent.Child.Login(loginComponent(componentContext))
+            is Config.Main -> RootComponent.Child.Main(mainComponent(componentContext))
         }
 
-    private fun listComponent(componentContext: ComponentContext): ListComponent =
-        DefaultListComponent(
+    private fun loginComponent(componentContext: ComponentContext): LoginComponent =
+        DefaultLoginComponent(
             componentContext = componentContext,
-            onItemSelected = { item: String -> // Supply dependencies and callbacks
-                navigation.push(Config.Details(item = item)) // Push the details component
-            },
+            onNavigateToMain = { navigation.replaceAll(Config.Main) },
         )
 
-    private fun detailsComponent(componentContext: ComponentContext, config: Config.Details): HomeComponent =
-        DefaultHomeComponent(
+    private fun mainComponent(componentContext: ComponentContext): MainComponent =
+        DefaultMainComponent(
             componentContext = componentContext,
-            item = config.item, // Supply arguments from the configuration
-            onBack = navigation::pop, // Pop the details component
         )
 
-    override fun onBackClicked(toIndex: Int) {
-        navigation.popTo(index = toIndex)
-    }
-
-    @Serializable // kotlinx-serialization plugin must be applied
+    @Serializable
     private sealed interface Config {
         @Serializable
-        data object List : Config
+        data object Login : Config
 
         @Serializable
-        data class Details(val item: String) : Config
+        data object Main : Config
     }
 }

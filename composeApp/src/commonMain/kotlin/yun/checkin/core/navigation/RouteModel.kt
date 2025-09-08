@@ -1,0 +1,22 @@
+package yun.checkin.core.navigation
+
+import kotlinx.serialization.Serializable
+
+sealed interface Route {
+    @Serializable
+    data object Contributor : Route
+
+    @Serializable
+    data object License : Route
+
+    @Serializable
+    data object Map : Route
+}
+
+sealed interface MainTabRoute : Route {
+    @Serializable
+    data object Home : MainTabRoute
+
+    @Serializable
+    data object Setting : MainTabRoute
+}

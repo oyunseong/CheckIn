@@ -74,10 +74,6 @@ fun NavGraphBuilder.mainNavGraph(
 ) {
     composable(
         route = "Home",
-//        enterTransition = verticalEnterTransition,
-//        exitTransition = null,
-//        popEnterTransition = null,
-//        popExitTransition = verticalExitTransition,
     ) {
         HomeScreen(
             modifier = Modifier.clickable {

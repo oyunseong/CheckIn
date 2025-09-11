@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import yun.checkin.core.data_api.CheckInRepository
 import yun.checkin.util.getCurrentFormattedTime
 
 class HomeViewModel(
@@ -23,6 +24,7 @@ class HomeViewModel(
     val effect = _effect.asSharedFlow()
 
     private val viewModelScope = CoroutineScope(Dispatchers.Default)
+
 
     init {
         startClock()
@@ -46,7 +48,7 @@ class HomeViewModel(
     private fun checkIn() {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
-            checkInRepository.checkIn()
+            checkInRepository.checkIn("yunseong")
                 .onSuccess {
                     _state.update { it.copy(isLoading = false, isCheckedIn = true) }
                     _effect.emit(HomeEffect.ShowToast("출석이 완료되었습니다."))

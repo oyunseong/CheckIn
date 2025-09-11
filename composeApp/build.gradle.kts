@@ -11,6 +11,7 @@ plugins {
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.composeHotReload)
     alias(libs.plugins.kotlinSerialization)
+    alias(libs.plugins.googleServices) // Added Google Services plugin
 }
 
 kotlin {
@@ -60,6 +61,11 @@ kotlin {
             implementation(libs.androidx.activity.compose)
             implementation(libs.koin.android)
 
+            // Firebase - Android에서만 사용 가능
+            implementation(project.dependencies.platform(libs.firebase.bom))
+            implementation(libs.firebase.auth)
+            implementation(libs.firebase.firestore)
+            implementation(libs.firebase.messaging)
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -82,7 +88,11 @@ kotlin {
 
             implementation(libs.kotlinx.datetime)
 
-
+            // Firebase
+            implementation(project.dependencies.platform(libs.firebase.bom))
+            implementation(libs.firebase.auth)
+            implementation(libs.firebase.firestore)
+            implementation(libs.firebase.messaging)
 
         }
         commonTest.dependencies {
@@ -138,4 +148,3 @@ compose.desktop {
         }
     }
 }
-

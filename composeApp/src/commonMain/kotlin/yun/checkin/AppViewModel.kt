@@ -2,7 +2,24 @@ package yun.checkin
 
 import androidx.lifecycle.ViewModel
 
-internal class AppViewModel : ViewModel(){
+// Firebase 관련 기능을 위한 expect 선언
+expect class FirebaseAuth() {
+    fun getCurrentUser(): String?
+    suspend fun signIn(email: String, password: String): Boolean
+}
 
+expect class FirebaseFirestore() {
+    
+    suspend fun saveData(collection: String, data: Map<String, Any>): Result<Unit>
+}
+
+internal class AppViewModel : ViewModel() {
+    // 이제 Firebase 관련 기능을 사용할 수 있습니다
+    private val auth = FirebaseAuth()
+    private val firestore = FirebaseFirestore()
+
+    suspend fun signIn(email: String, password: String): Boolean {
+        return auth.signIn(email, password)
+    }
 
 }

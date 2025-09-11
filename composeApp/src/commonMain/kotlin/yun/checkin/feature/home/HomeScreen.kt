@@ -40,6 +40,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import org.koin.compose.viewmodel.koinViewModel
+import yun.checkin.AppViewModel
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
@@ -47,7 +48,7 @@ import kotlin.time.ExperimentalTime
 fun HomeScreen(
     modifier: Modifier = Modifier,
     padding: PaddingValues,
-    viewModel: HomeViewModel = koinViewModel()
+    viewModel: HomeViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 

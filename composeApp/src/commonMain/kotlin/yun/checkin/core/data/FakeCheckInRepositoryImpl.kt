@@ -3,6 +3,7 @@ package yun.checkin.core.data
 import kotlinx.datetime.TimeZone.Companion.currentSystemDefault
 import kotlinx.datetime.toLocalDateTime
 import yun.checkin.FirebaseFirestore
+import yun.checkin.core.data_api.AttendanceRecord
 import yun.checkin.core.data_api.CheckInRepository
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
@@ -44,5 +45,33 @@ class FakeCheckInRepositoryImpl : CheckInRepository {
         }
 
         return Result.success(hasCheckedInToday)
+    }
+
+    override suspend fun getHistory(userId: String): Result<List<AttendanceRecord>> {
+        return try {
+            val documentsResult = firestore.getDocuments(
+                collection = "user_attendance",
+                field = "user_id",
+                value = userId
+            )
+
+            val attendanceRecords = documentsResult.mapNotNull { doc ->
+                val attendanceTimeMillis = doc?.get("attendance_time") as? Long
+                val userIdFromDoc = doc?.get("user_id") as? String
+
+                if (attendanceTimeMillis != null && userIdFromDoc != null) {
+                    val attendanceTime = Instant.fromEpochMilliseconds(attendanceTimeMillis)
+                        .toLocalDateTime(currentSystemDefault())
+                    AttendanceRecord(
+                        attendanceTime = attendanceTime,
+                        userId = userIdFromDoc
+                    )
+                } else null
+            }.sortedByDescending { it.attendanceTime }
+
+            Result.success(attendanceRecords)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 }

@@ -9,6 +9,7 @@ import org.koin.dsl.KoinAppDeclaration
 import org.koin.dsl.module
 import yun.checkin.core.data_api.CheckInRepository
 import yun.checkin.core.data.FakeCheckInRepositoryImpl
+import yun.checkin.feature.history.HistoryViewModel
 import yun.checkin.feature.home.HomeViewModel
 import yun.checkin.feature.main.MainContent
 
@@ -24,6 +25,7 @@ internal fun App(
 internal val appModule = module {
     single<CheckInRepository> { FakeCheckInRepositoryImpl() }
     viewModelOf(::HomeViewModel)
+    viewModelOf(::HistoryViewModel)
     viewModelOf(::AppViewModel)
 
 }

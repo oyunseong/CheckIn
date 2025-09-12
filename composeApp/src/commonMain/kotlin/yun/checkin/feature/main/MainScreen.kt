@@ -23,6 +23,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import org.koin.compose.viewmodel.koinViewModel
+import yun.checkin.feature.history.HistoryScreen
+import yun.checkin.feature.history.HistoryViewModel
 import yun.checkin.feature.home.HomeScreen
 
 
@@ -34,7 +37,7 @@ internal fun MainContent(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
 ) {
-    val mainTabs = listOf("Home", "Setting")
+    val mainTabs = listOf("Home", "History", "Setting")
     val snackbarHostState = remember { SnackbarHostState() }
     val currentTab = navController.currentBackStackEntryAsState()
 
@@ -55,7 +58,14 @@ internal fun MainContent(
                 currentTab = currentTab.value?.destination?.route,
                 onClick = {
                     if (currentTab.value?.destination?.route == it) return@BottomBar
-                    navController.navigate(it)
+                    navController.navigate(it) {
+                        // 메인 탭들은 백스택에서 재사용하도록 설정
+                        popUpTo("Home") {
+                            saveState = true
+                        }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
                 }
             )
         }
@@ -90,6 +100,16 @@ fun NavGraphBuilder.mainNavGraph(
     }
 
     composable(
+        route = "History",
+    ) {
+        HistoryScreen(
+            padding = padding,
+            modifier = Modifier,
+            viewModel = koinViewModel<HistoryViewModel>()
+        )
+    }
+
+    composable(
         route = "Setting",
 //        enterTransition = verticalEnterTransition,
 //        exitTransition = null,
@@ -101,7 +121,14 @@ fun NavGraphBuilder.mainNavGraph(
                 .fillMaxSize()
                 .background(Color.Red)
                 .clickable {
-                    navController.navigate("Home")
+                    navController.navigate("Home") {
+                        // 메인 탭들은 백스택에서 재사용하도록 설정
+                        popUpTo("Home") {
+                            saveState = true
+                        }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
                 }
         ) {
 

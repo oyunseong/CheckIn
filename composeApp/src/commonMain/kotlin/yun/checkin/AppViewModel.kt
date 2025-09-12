@@ -8,11 +8,6 @@ expect class FirebaseAuth() {
     suspend fun signIn(email: String, password: String): Boolean
 }
 
-expect class FirebaseFirestore() {
-    
-    suspend fun saveData(collection: String, data: Map<String, Any>): Result<Unit>
-}
-
 internal class AppViewModel : ViewModel() {
     // 이제 Firebase 관련 기능을 사용할 수 있습니다
     private val auth = FirebaseAuth()

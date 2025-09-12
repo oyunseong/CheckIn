@@ -31,4 +31,24 @@ actual class FirebaseFirestore {
             .await()
             .let { Result.success(Unit) }
     }
+
+    actual suspend fun getData(collection: String, documentId: String): Map<String, Any>? {
+        return firestore.collection(collection)
+            .document(documentId)
+            .get()
+            .await()
+            .data
+    }
+
+    actual suspend fun getDocuments(
+        collection: String,
+        field: String,
+        value: Any
+    ): List<Map<String, Any?>?> {
+        return firestore.collection(collection)
+            .whereEqualTo(field, value)
+            .get()
+            .await()
+            .documents.map { it.data }
+    }
 }

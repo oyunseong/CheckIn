@@ -1,9 +1,7 @@
 package yun.checkin.feature.home
 
-import yun.checkin.AppViewModel
-
 data class HomeState(
-    val isLoading: Boolean = false,
+    val isLoading: Boolean = true,
     val isCheckedIn: Boolean = false,
     val currentTime: String = "00:00:00",
     val error: String? = null

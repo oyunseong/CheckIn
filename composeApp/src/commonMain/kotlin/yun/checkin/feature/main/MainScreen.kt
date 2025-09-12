@@ -54,6 +54,7 @@ internal fun MainContent(
                 tabs = mainTabs,
                 currentTab = currentTab.value?.destination?.route,
                 onClick = {
+                    if (currentTab.value?.destination?.route == it) return@BottomBar
                     navController.navigate(it)
                 }
             )

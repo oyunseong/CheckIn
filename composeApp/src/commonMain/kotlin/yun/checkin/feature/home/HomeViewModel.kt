@@ -28,6 +28,28 @@ class HomeViewModel(
 
     init {
         startClock()
+
+        viewModelScope.launch {
+            checkInRepository.isCheckIn("yunseong2")
+                .onSuccess { result ->
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            isCheckedIn = result
+                        )
+                    }
+                }
+                .onFailure {
+                    // 실패한 경우에도 isLoading은 false로, 출석 상태는 false로 처리
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            isCheckedIn = false
+                        )
+                    }
+                }
+        }
+
     }
 
     fun onIntent(intent: HomeIntent) {
@@ -48,7 +70,7 @@ class HomeViewModel(
     private fun checkIn() {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
-            checkInRepository.checkIn("yunseong")
+            checkInRepository.checkIn("yunseong2")
                 .onSuccess {
                     _state.update { it.copy(isLoading = false, isCheckedIn = true) }
                     _effect.emit(HomeEffect.ShowToast("출석이 완료되었습니다."))

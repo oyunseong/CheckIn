@@ -11,7 +11,7 @@ plugins {
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.composeHotReload)
     alias(libs.plugins.kotlinSerialization)
-    alias(libs.plugins.googleServices) // Added Google Services plugin
+    alias(libs.plugins.googleServices)
 }
 
 kotlin {
@@ -88,11 +88,6 @@ kotlin {
 
             implementation(libs.kotlinx.datetime)
 
-            // Firebase
-            implementation(project.dependencies.platform(libs.firebase.bom))
-            implementation(libs.firebase.auth)
-            implementation(libs.firebase.firestore)
-            implementation(libs.firebase.messaging)
 
         }
         commonTest.dependencies {

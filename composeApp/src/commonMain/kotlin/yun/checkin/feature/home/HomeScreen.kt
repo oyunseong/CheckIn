@@ -34,13 +34,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import checkin.composeapp.generated.resources.Res
-import checkin.composeapp.generated.resources.compose_multiplatform
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
-import yun.checkin.AppViewModel
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
@@ -72,10 +70,10 @@ fun HomeScreen(
 
 @Composable
 fun HomeScreen(
-    modifier: Modifier,
-    padding: PaddingValues,
-    state: HomeState,
-    onIntent: (HomeIntent) -> Unit
+    modifier: Modifier = Modifier,
+    padding: PaddingValues = PaddingValues(),
+    state: HomeState = HomeState(),
+    onIntent: (HomeIntent) -> Unit = {}
 ) {
     Box(
         modifier = modifier
@@ -91,7 +89,9 @@ fun HomeScreen(
             .padding(padding)
     ) {
         Column(
-            modifier = Modifier.fillMaxSize().padding(16.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceAround
         ) {
@@ -135,10 +135,9 @@ private fun TimeDisplay(time: String) {
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier
-            .size(240.dp)
             .clip(CircleShape)
             .background(Color.White.copy(alpha = 0.1f))
-            .padding(16.dp)
+            .padding(30.dp)
     ) {
         Text(
             text = time,
@@ -181,8 +180,7 @@ private fun CheckInButton(
     Button(
         onClick = onClick,
         enabled = buttonEnabled,
-        modifier = Modifier
-            .fillMaxWidth()
+        modifier = Modifier.fillMaxWidth()
             .height(56.dp),
         shape = RoundedCornerShape(16.dp),
         colors = ButtonDefaults.buttonColors(
@@ -205,5 +203,14 @@ private fun CheckInButton(
                 modifier = Modifier.graphicsLayer(alpha = animatedAlpha)
             )
         }
+    }
+}
+
+
+@Preview()
+@Composable
+private fun Preview() {
+    MaterialTheme {
+        HomeScreen()
     }
 }

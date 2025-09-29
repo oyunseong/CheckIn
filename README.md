@@ -47,7 +47,7 @@
 
 
 <p align="left">
-  <img width="904" height="2316" alt="Screenshot_20250929_191420" src="https://github.com/user-attachments/assets/90b7250f-d49f-459f-bb9d-8627d360ac6e" />
+  <img width="205" alt="Screenshot_20250929_191420" src="https://github.com/user-attachments/assets/90b7250f-d49f-459f-bb9d-8627d360ac6e" />
 </p>
 
 ---
@@ -58,7 +58,7 @@
 - 하단 네비게이션 바는 그대로 유지  
 
 <p align="left">
-  <img width="904" height="2316" alt="Screenshot_20250929_191504" src="https://github.com/user-attachments/assets/f68920aa-a868-4f50-a9bc-8f094eadde9c" />
+  <img width="205" alt="Screenshot_20250929_191504" src="https://github.com/user-attachments/assets/f68920aa-a868-4f50-a9bc-8f094eadde9c" />
 </p>
 
 ---

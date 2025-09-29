@@ -62,9 +62,3 @@
 </p>
 
 ---
-
-## 🔧 개발 및 빌드 방법
-
-### Android
-```bash
-./gradlew :androidApp:installDebug

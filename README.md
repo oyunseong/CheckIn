@@ -1,28 +1,69 @@
-This is a Kotlin Multiplatform project targeting Android, iOS, Web, Desktop (JVM), Server.
+# 📆 출석체크 앱 (Kotlin Multiplatform)
 
-* [/composeApp](./composeApp/src) is for code that will be shared across your Compose Multiplatform applications.
-  It contains several subfolders:
-  - [commonMain](./composeApp/src/commonMain/kotlin) is for code that’s common for all targets.
-  - Other folders are for Kotlin code that will be compiled for only the platform indicated in the folder name.
-    For example, if you want to use Apple’s CoreCrypto for the iOS part of your Kotlin app,
-    the [iosMain](./composeApp/src/iosMain/kotlin) folder would be the right place for such calls.
-    Similarly, if you want to edit the Desktop (JVM) specific part, the [jvmMain](./composeApp/src/jvmMain/kotlin)
-    folder is the appropriate location.
+<p align="center">
+  <img src="screenshots/Screenshot_20250929_191420.jpeg" width="250" />
+  <img src="screenshots/Screenshot_20250929_191504.jpeg" width="250" />
+</p>
 
-* [/iosApp](./iosApp/iosApp) contains iOS applications. Even if you’re sharing your UI with Compose Multiplatform,
-  you need this entry point for your iOS app. This is also where you should add SwiftUI code for your project.
+## 개요
 
-* [/server](./server/src/main/kotlin) is for the Ktor server application.
+**출석체크 앱**은 Kotlin Multiplatform 기반으로 개발된 출석 관리 앱입니다. 
+하루에 한 번 버튼을 눌러 출석을 체크하고, 상태에 따라 실시간으로 UI가 변경됩니다.  
+사용자는 매일 출석 여부를 확인할 수 있으며, 각 플랫폼(Android/iOS)에서 동일한 UI/UX를 제공합니다.
 
-* [/shared](./shared/src) is for the code that will be shared between all targets in the project.
-  The most important subfolder is [commonMain](./shared/src/commonMain/kotlin). If preferred, you can add code to the platform-specific folders here too.
+---
 
+## ✅ 주요 기능
 
-Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html),
-[Compose Multiplatform](https://github.com/JetBrains/compose-multiplatform/#compose-multiplatform),
-[Kotlin/Wasm](https://kotl.in/wasm/)…
+| 기능              | 설명 |
+|-------------------|------|
+| 실시간 디지털 시계 | 현재 시간을 초 단위로 표시 |
+| 출석 상태 표시    | 출석 전/후에 따라 상태 메시지 변경 |
+| 출석 버튼         | 출석이 가능한 시간대에만 활성화 |
+| 바텀 네비게이션   | 홈, 출석 목록, 설정 탭 제공 |
 
-We would appreciate your feedback on Compose/Web and Kotlin/Wasm in the public Slack channel [#compose-web](https://slack-chats.kotlinlang.org/c/compose-web).
-If you face any issues, please report them on [YouTrack](https://youtrack.jetbrains.com/newIssue?project=CMP).
+---
 
-You can open the web application by running the `:composeApp:wasmJsBrowserDevelopmentRun` Gradle task.
+## 💻 기술 스택
+
+| 기술 | 설명 |
+|------|------|
+| **Kotlin Multiplatform** | Android, iOS 공통 로직 작성 |
+| **Jetpack Compose (Multiplatform)** | UI 구현 |
+| **Firebase Auth / Firestore** | 사용자 인증 및 출석 데이터 저장 (iOS는 Swift에서 직접 bridging) |
+| **Swift + Objective-C Bridge** | iOS에서 Firebase Firestore 연동 |
+| **Koin** | DI 구성 |
+| **Decompose** | 화면 전환 관리 |
+| **Essenty** | MVI 기반 상태 관리 |
+
+---
+
+## 📱 화면 설명
+
+### 1. 출석 전 화면  
+- 현재 날짜와 시간 표시  
+- `"아직 출석 전입니다."` 상태 메시지 표시  
+- 하단 `"출석하기"` 버튼 활성화  
+
+<p align="left">
+  <img src="screenshots/Screenshot_20250929_191420.jpeg" width="250" />
+</p>
+
+---
+
+### 2. 출석 완료 화면  
+- `"오늘은 출석 완료! ✅"` 상태 메시지 표시  
+- `"출석 완료"` 버튼 비활성화로 전환  
+- 하단 네비게이션 바는 그대로 유지  
+
+<p align="left">
+  <img src="screenshots/Screenshot_20250929_191504.jpeg" width="250" />
+</p>
+
+---
+
+## 🔧 개발 및 빌드 방법
+
+### Android
+```bash
+./gradlew :androidApp:installDebug

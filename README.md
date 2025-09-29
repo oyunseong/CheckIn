@@ -1,59 +1,70 @@
-# 📆 출석체크 앱 (Kotlin Multiplatform)
+# 📲 KMP 출석체크 앱
 
-## 개요
-
-**출석체크 앱**은 Kotlin Multiplatform 기반으로 개발된 출석 관리 앱입니다. 
-하루에 한 번 버튼을 눌러 출석을 체크하고, 상태에 따라 실시간으로 UI가 변경됩니다.  
-사용자는 매일 출석 여부를 확인할 수 있으며, 각 플랫폼(Android/iOS)에서 동일한 UI/UX를 제공합니다.
+이 앱은 Kotlin Multiplatform (KMP)을 기반으로 개발된 **출석 체크 시스템 앱**입니다.  
+Android와 iOS 모두에서 동일한 코드베이스로 작동하며, Firebase 인증과 출석 이력을 관리할 수 있는 기능을 제공합니다.
 
 ---
 
-## ✅ 주요 기능
+## 🧩 주요 기능
 
-| 기능              | 설명 |
-|-------------------|------|
-| 실시간 디지털 시계 | 현재 시간을 초 단위로 표시 |
-| 출석 상태 표시    | 출석 전/후에 따라 상태 메시지 변경 |
-| 출석 버튼         | 출석이 가능한 시간대에만 활성화 |
-| 바텀 네비게이션   | 홈, 출석 목록, 설정 탭 제공 |
+- ✅ 로그인 / 회원가입 (Firebase Auth 연동)
+- ⏰ 현재 시간 및 날짜 자동 표시
+- 📍 **출석 체크** 기능
+- 📖 출석 이력 확인
+- 🧭 Android / iOS 대응
+- 🧪 Compose Multiplatform 기반 UI
 
 ---
 
-## 💻 기술 스택
+## 📸 앱 화면 미리보기
 
-| 기술 | 설명 |
+### 🔐 로그인 화면
+
+<p align="center">
+  <img width="250" alt="Screenshot_20250929_192154" src="https://github.com/user-attachments/assets/9438b72e-8b61-469a-9950-453aec9e2970" />
+
+</p>
+
+---
+
+### ✅ 홈 화면 (출석 전/후)
+
+<details>
+<summary>출석 전 / 출석 완료 상태</summary>
+
+<p align="center">
+  <img width="250" alt="Screenshot_20250929_191420" src="https://github.com/user-attachments/assets/7ea72f36-590b-4c6e-b201-6c451ffd8a84" />
+
+  <img width="250" alt="Screenshot_20250929_191504" src="https://github.com/user-attachments/assets/e814f819-79bf-42ca-adea-4174be4d13fe" />
+
+</p>
+
+</details>
+
+---
+
+### 📋 출석 기록 화면
+
+<details>
+<summary>출석 내역 확인</summary>
+
+<p align="center">
+  <img width="250" alt="Screenshot_20250929_192119" src="https://github.com/user-attachments/assets/788ec2e2-75f0-4454-96db-3a7ad5d2a20f" />
+
+</p>
+
+</details>
+
+---
+
+## 🛠 기술 스택
+
+| 항목 | 기술 |
 |------|------|
-| **Kotlin Multiplatform** | Android, iOS 공통 로직 작성 |
-| **Jetpack Compose (Multiplatform)** | UI 구현 |
-| **Firebase Auth / Firestore** | 사용자 인증 및 출석 데이터 저장 (iOS는 Swift에서 직접 bridging) |
-| **Swift + Objective-C Bridge** | iOS에서 Firebase Firestore 연동 |
-| **Koin** | DI 구성 |
-| **Decompose** | 화면 전환 관리 |
-| **Essenty** | MVI 기반 상태 관리 |
-
----
-
-## 📱 화면 설명
-
-### 1. 출석 전 화면  
-- 현재 날짜와 시간 표시  
-- `"아직 출석 전입니다."` 상태 메시지 표시  
-- 하단 `"출석하기"` 버튼 활성화  
-
-
-<p align="left">
-  <img width="205" alt="Screenshot_20250929_191420" src="https://github.com/user-attachments/assets/90b7250f-d49f-459f-bb9d-8627d360ac6e" />
-</p>
-
----
-
-### 2. 출석 완료 화면  
-- `"오늘은 출석 완료! ✅"` 상태 메시지 표시  
-- `"출석 완료"` 버튼 비활성화로 전환  
-- 하단 네비게이션 바는 그대로 유지  
-
-<p align="left">
-  <img width="205" alt="Screenshot_20250929_191504" src="https://github.com/user-attachments/assets/f68920aa-a868-4f50-a9bc-8f094eadde9c" />
-</p>
-
----
+| 언어 | Kotlin Multiplatform (KMP) |
+| UI | Jetpack Compose Multiplatform |
+| 인증 | Firebase Auth |
+| 데이터베이스 | Firebase Firestore |
+| DI | Koin |
+| iOS 연동 | Swift + cinterop |
+| 빌드 시스템 | Gradle |

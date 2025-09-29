@@ -29,7 +29,6 @@ Android와 iOS 모두에서 동일한 코드베이스로 작동하며, Firebase 
 
 ### ✅ 홈 화면 (출석 전/후)
 
-<details>
 <summary>출석 전 / 출석 완료 상태</summary>
 
 <p align="center">
@@ -39,13 +38,11 @@ Android와 iOS 모두에서 동일한 코드베이스로 작동하며, Firebase 
 
 </p>
 
-</details>
 
 ---
 
 ### 📋 출석 기록 화면
 
-<details>
 <summary>출석 내역 확인</summary>
 
 <p align="center">
@@ -53,7 +50,6 @@ Android와 iOS 모두에서 동일한 코드베이스로 작동하며, Firebase 
 
 </p>
 
-</details>
 
 ---
 

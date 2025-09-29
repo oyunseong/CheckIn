@@ -35,6 +35,7 @@ import yun.checkin.feature.auth.AuthViewModel
 import yun.checkin.feature.history.HistoryScreen
 import yun.checkin.feature.history.HistoryViewModel
 import yun.checkin.feature.home.HomeScreen
+import yun.checkin.feature.setting.SettingScreen
 
 
 //@Composable
@@ -127,25 +128,10 @@ fun NavGraphBuilder.mainNavGraph(
 //        popEnterTransition = null,
 //        popExitTransition = verticalExitTransition,
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = "설정",
-                fontSize = 28.sp,
-                modifier = Modifier.padding(bottom = 32.dp)
-            )
-
-            Button(
-                onClick = { authViewModel.signOut() },
-                modifier = Modifier.padding(top = 16.dp)
-            ) {
-                Text("로그아웃")
-            }
-        }
+        SettingScreen(
+            modifier = Modifier,
+            padding = padding,
+            viewModel = authViewModel
+        )
     }
 }

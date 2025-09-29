@@ -5,18 +5,25 @@ import androidx.compose.animation.ExitTransition
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -24,6 +31,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import org.koin.compose.viewmodel.koinViewModel
+import yun.checkin.feature.auth.AuthViewModel
 import yun.checkin.feature.history.HistoryScreen
 import yun.checkin.feature.history.HistoryViewModel
 import yun.checkin.feature.home.HomeScreen
@@ -36,6 +44,7 @@ import yun.checkin.feature.home.HomeScreen
 internal fun MainContent(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
+    authViewModel: AuthViewModel = koinViewModel(),
 ) {
     val mainTabs = listOf("Home", "History", "Setting")
     val snackbarHostState = remember { SnackbarHostState() }
@@ -81,6 +90,7 @@ internal fun MainContent(
             mainNavGraph(
                 padding = innerPadding,
                 navController = navController,
+                authViewModel = authViewModel
             )
         }
     }
@@ -89,6 +99,7 @@ internal fun MainContent(
 fun NavGraphBuilder.mainNavGraph(
     padding: PaddingValues,
     navController: NavHostController,
+    authViewModel: AuthViewModel,
 ) {
     composable(
         route = "Home",
@@ -116,22 +127,25 @@ fun NavGraphBuilder.mainNavGraph(
 //        popEnterTransition = null,
 //        popExitTransition = verticalExitTransition,
     ) {
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.Red)
-                .clickable {
-                    navController.navigate("Home") {
-                        // 메인 탭들은 백스택에서 재사용하도록 설정
-                        popUpTo("Home") {
-                            saveState = true
-                        }
-                        launchSingleTop = true
-                        restoreState = true
-                    }
-                }
+                .padding(padding)
+                .padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            Text(
+                text = "설정",
+                fontSize = 28.sp,
+                modifier = Modifier.padding(bottom = 32.dp)
+            )
 
+            Button(
+                onClick = { authViewModel.signOut() },
+                modifier = Modifier.padding(top = 16.dp)
+            ) {
+                Text("로그아웃")
+            }
         }
     }
 }

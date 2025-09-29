@@ -1,11 +1,10 @@
 package yun.checkin
 
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.tasks.await
+import kotlin.coroutines.resume
 import com.google.firebase.auth.FirebaseAuth as AndroidFirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore as AndroidFirebaseFirestore
-import kotlinx.coroutines.tasks.await
-import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
 
 // Android에서 실제 Firebase Android SDK 사용
 actual class FirebaseAuth {
@@ -30,6 +29,31 @@ actual class FirebaseAuth {
         } catch (e: Exception) {
             println("❌ Android Firebase Auth - signIn failed: ${e.message}")
             throw e
+        }
+    }
+
+    actual suspend fun signUp(email: String, password: String): Boolean {
+        println("🔐 Android Firebase Auth - signUp() called for email: $email")
+
+        return try {
+            val result = auth.createUserWithEmailAndPassword(email, password).await()
+            val success = result.user != null
+            println("✅ Android Firebase Auth - signUp success: $success")
+            success
+        } catch (e: Exception) {
+            println("❌ Android Firebase Auth - signUp failed")
+            throw e
+        }
+    }
+
+    actual suspend fun signOut(): Result<Boolean> {
+        return suspendCancellableCoroutine { continuation ->
+            auth.signOut()
+            if (auth.currentUser == null) {
+                continuation.resume(Result.success(true))
+            } else {
+                continuation.resume(Result.failure(Exception("Sign out failed")))
+            }
         }
     }
 }

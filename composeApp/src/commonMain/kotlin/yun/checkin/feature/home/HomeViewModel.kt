@@ -1,6 +1,7 @@
 package yun.checkin.feature.home
 
 import androidx.lifecycle.ViewModel
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -25,11 +26,19 @@ class HomeViewModel(
 
     private val viewModelScope = CoroutineScope(Dispatchers.Default)
 
+    private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
+        // 여기에 예외가 잡힙니다!
+        println("exceptionHandler : " + throwable.message)
+
+        // 필요하다면 Crashlytics 같은 곳에 추가 로깅
+        // throwable.printStackTrace() // 디버깅 시 사용 가능
+    }
+
 
     init {
         startClock()
 
-        viewModelScope.launch {
+        viewModelScope.launch(exceptionHandler) {
             checkInRepository.isCheckIn("yunseong2")
                 .onSuccess { result ->
                     _state.update {

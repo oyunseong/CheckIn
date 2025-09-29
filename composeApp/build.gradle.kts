@@ -2,6 +2,7 @@ import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
 
 plugins {
@@ -30,6 +31,31 @@ kotlin {
         iosTarget.binaries.framework {
             baseName = "ComposeApp"
             isStatic = true
+            // Swift interop 설정
+            freeCompilerArgs += listOf(
+                "-Xobjc-generics"
+            )
+        }
+
+        // 공식 문서 방식에 따른 cinterop 설정
+        iosTarget.compilations.getByName("main") {
+            val logger by cinterops.creating {
+                // .def 파일 경로 (src/nativeInterop/cinterop/ 디렉토리에 있으면 생략 가능)
+                definitionFile.set(project.file("src/nativeInterop/cinterop/logger.def"))
+                // 헤더 파일 검색 디렉토리 설정
+                includeDirs("src/nativeInterop/cinterop")
+                // iOS 앱 모듈과 연결
+                compilerOpts("-framework", "Foundation")
+                // iOS 앱의 Swift 심볼에 접근하기 위한 설정
+                compilerOpts("-I$projectDir/../iosApp/iosApp")
+            }
+        }
+
+        // 링커 옵션: iOS 앱 바이너리와 연결
+        iosTarget.binaries.all {
+            linkerOpts("-framework", "Foundation")
+            // iOS 앱 타겟에서 심볼을 가져오도록 설정
+            linkerOpts("-Wl,-U,_OBJC_CLASS_\$_Logger")
         }
     }
 
@@ -53,6 +79,10 @@ kotlin {
             }
         }
         binaries.executable()
+    }
+
+    targets.withType<KotlinNativeTarget>().all {
+        // cinterop 설정을 iOS 타겟별로 이동함 - 중복 방지를 위해 주석 처리
     }
 
     sourceSets {
@@ -97,6 +127,9 @@ kotlin {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutinesSwing)
         }
+        iosMain.dependencies {
+
+        }
     }
 }
 
@@ -131,6 +164,7 @@ dependencies {
     implementation(platform(libs.koin.bom))
     debugImplementation(compose.uiTooling)
 }
+
 
 compose.desktop {
     application {

@@ -6,6 +6,9 @@ class AppDelegate: NSObject, UIApplicationDelegate {
                    didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
     FirebaseApp.configure()
 
+      // Logger 클래스 초기화 (심볼 로딩 보장)
+      Logger.log("🚀 iOS App started - Logger initialized")
+
     return true
   }
 }

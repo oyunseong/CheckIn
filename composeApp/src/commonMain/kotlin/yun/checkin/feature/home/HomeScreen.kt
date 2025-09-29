@@ -39,6 +39,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
+import yun.checkin.core.utils.DateFormatter
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
@@ -88,22 +89,26 @@ fun HomeScreen(
             )
             .padding(padding)
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceAround
-        ) {
-            Header()
-            TimeDisplay(state.currentTime)
-            CheckInStatus(state.isCheckedIn)
-            CheckInButton(
-                isLoading = state.isLoading,
-                isCheckedIn = state.isCheckedIn,
-                onClick = { onIntent(HomeIntent.OnCheckInClick) }
-            )
+        Column() {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.SpaceAround
+            ) {
+                Header()
+                TimeDisplay(state.currentTime)
+                CheckInStatus(state.isCheckedIn)
+                CheckInButton(
+                    isLoading = state.isLoading,
+                    isCheckedIn = state.isCheckedIn,
+                    onClick = { onIntent(HomeIntent.OnCheckInClick) }
+                )
+            }
+
         }
+
     }
 }
 
@@ -112,7 +117,10 @@ fun HomeScreen(
 private fun Header() {
     val now = Clock.System.now()
     val localDateTime = now.toLocalDateTime(TimeZone.currentSystemDefault())
-    val dateString = "${localDateTime.year}년 ${localDateTime.month}월 ${localDateTime.day}일"
+
+    // DateFormatter를 사용하여 날짜 포맷팅
+    val dateString = DateFormatter.toKoreanDate(localDateTime)
+    val dayOfWeek = DateFormatter.getDayOfWeekKorean(localDateTime)
 
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
@@ -123,11 +131,24 @@ private fun Header() {
         )
         Spacer(modifier = Modifier.height(4.dp))
         Text(
-            text = dateString,
+            text = "$dateString ($dayOfWeek)",
             style = MaterialTheme.typography.bodyLarge,
             color = Color.White.copy(alpha = 0.8f)
         )
     }
+}
+
+/**
+ * LocalDateTime을 "yyyy년 MM월 dd일" 포맷으로 변환하는 함수
+ * @deprecated DateFormatter.toKoreanDate()를 사용하세요
+ */
+@Deprecated("Use DateFormatter.toKoreanDate() instead")
+private fun formatDateToKorean(dateTime: kotlinx.datetime.LocalDateTime): String {
+    val year = dateTime.year
+    val month = dateTime.monthNumber.toString().padStart(2, '0')
+    val day = dateTime.dayOfMonth.toString().padStart(2, '0')
+
+    return "${year}년 ${month}월 ${day}일"
 }
 
 @Composable

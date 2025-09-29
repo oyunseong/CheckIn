@@ -45,8 +45,9 @@
 - `"아직 출석 전입니다."` 상태 메시지 표시  
 - 하단 `"출석하기"` 버튼 활성화  
 
+
 <p align="left">
-  <img src="screenshots/Screenshot_20250929_191420.jpeg" width="250" />
+  <img width="904" height="2316" alt="Screenshot_20250929_191420" src="https://github.com/user-attachments/assets/90b7250f-d49f-459f-bb9d-8627d360ac6e" />
 </p>
 
 ---
@@ -57,7 +58,7 @@
 - 하단 네비게이션 바는 그대로 유지  
 
 <p align="left">
-  <img src="screenshots/Screenshot_20250929_191504.jpeg" width="250" />
+  <img width="904" height="2316" alt="Screenshot_20250929_191504" src="https://github.com/user-attachments/assets/f68920aa-a868-4f50-a9bc-8f094eadde9c" />
 </p>
 
 ---

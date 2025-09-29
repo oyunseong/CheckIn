@@ -8,9 +8,9 @@ data class AttendanceRecord(
 )
 
 interface CheckInRepository {
-    suspend fun checkIn(userId: String): Result<Unit>
+    suspend fun checkIn(): Result<Unit>
 
-    suspend fun isCheckIn(userId: String): Result<Boolean>
+    suspend fun isCheckIn(): Result<Boolean>
 
-    suspend fun getHistory(userId: String): Result<List<AttendanceRecord>>
+    suspend fun getHistory(): Result<List<AttendanceRecord>>
 }

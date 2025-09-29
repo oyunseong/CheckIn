@@ -11,7 +11,7 @@ actual class FirebaseAuth {
 
     private val auth = AndroidFirebaseAuth.getInstance()
 
-    actual fun getCurrentUser(): String? {
+    actual fun getCurrentUUID(): String? {
         println("🔐 Android Firebase Auth - getCurrentUser() called")
         val result = auth.currentUser?.uid
         println("👤 Android Firebase Auth - getCurrentUser result: $result")

@@ -6,46 +6,76 @@ import yun.checkin.firebase.FirebaseHelper
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
-// iOS에서 Swift Firebase Helper를 사용한 실제 구현
-// 임시로 Logger 대신 println 사용 (cinterop 바인딩 문제 해결 전까지)
-
 @OptIn(ExperimentalForeignApi::class)
 actual class FirebaseAuth {
 
-    actual fun getCurrentUser(): String? {
-        FirebaseHelper.log("🔐 iOS Firebase Auth - getCurrentUser() called")
-
-        // TODO: Swift에서 Auth 메서드 활성화 후 사용
-        // return FirebaseHelper.getCurrentUser()
-
-        // 임시 시뮬레이션
-        val result = "ios_user_12345"
-        FirebaseHelper.log("👤 iOS Firebase Auth - getCurrentUser result: $result")
-        return result
+    actual fun getCurrentUUID(): String? {
+        // Swift의 getCurrentUUID 함수 호출
+        return FirebaseHelper.getCurrentUUID()
     }
 
     actual suspend fun signIn(email: String, password: String): Boolean {
         FirebaseHelper.log("🔐 iOS Firebase Auth - signIn() called for email: $email")
 
         return try {
-            // TODO: Swift에서 Auth 메서드 활성화 후 사용
-            // val result = suspendCancellableCoroutine<Boolean> { continuation ->
-            //     FirebaseHelper.signInWithEmail(email, password) { success, error ->
-            //         if (error != null) {
-            //             continuation.resumeWithException(Exception(error))
-            //         } else {
-            //             continuation.resume(success)
-            //         }
-            //     }
-            // }
-
-            // 임시 시뮬레이션
-            val success = email.isNotEmpty() && password.length >= 6
-            FirebaseHelper.log("✅ iOS Firebase Auth - signIn success: $success")
-            success
+            // 실제 Swift FirebaseHelper 사용!
+            val result = suspendCancellableCoroutine { continuation ->
+                FirebaseHelper.signInWithEmail(email, password) { success, error ->
+                    if (error != null) {
+                        continuation.resumeWithException(Exception(error))
+                    } else {
+                        continuation.resume(success)
+                    }
+                }
+            }
+            FirebaseHelper.log("✅ iOS Firebase Auth - signIn success: $result")
+            result
         } catch (e: Exception) {
             FirebaseHelper.log("❌ iOS Firebase Auth - signIn failed: ${e.message}")
             throw e
+        }
+    }
+
+    actual suspend fun signUp(email: String, password: String): Boolean {
+        FirebaseHelper.log("🔐 iOS Firebase Auth - signUp() called for email: $email")
+
+        return try {
+            // 실제 Swift FirebaseHelper 사용!
+            val result = suspendCancellableCoroutine<Boolean> { continuation ->
+                FirebaseHelper.createUserWithEmail(email, password) { success, error ->
+                    if (error != null) {
+                        continuation.resumeWithException(Exception(error))
+                    } else {
+                        continuation.resume(success)
+                    }
+                }
+            }
+            FirebaseHelper.log("✅ iOS Firebase Auth - signUp success: $result")
+            result
+        } catch (e: Exception) {
+            FirebaseHelper.log("❌ iOS Firebase Auth - signUp failed: ${e.message}")
+            throw e
+        }
+    }
+
+    actual suspend fun signOut(): Result<Boolean> {
+        FirebaseHelper.log("🔐 iOS Firebase Auth - signOut() called")
+
+        return try {
+            val result = suspendCancellableCoroutine<Boolean> { continuation ->
+                FirebaseHelper.signOut { success, error ->
+                    if (error != null) {
+                        continuation.resumeWithException(Exception(error))
+                    } else {
+                        continuation.resume(success)
+                    }
+                }
+            }
+            FirebaseHelper.log("✅ iOS Firebase Auth - signOut success: $result")
+            Result.success(result)
+        } catch (e: Exception) {
+            FirebaseHelper.log("❌ iOS Firebase Auth - signOut failed: ${e.message}")
+            Result.failure(e)
         }
     }
 }

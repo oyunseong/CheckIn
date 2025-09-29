@@ -39,7 +39,7 @@ class HomeViewModel(
         startClock()
 
         viewModelScope.launch(exceptionHandler) {
-            checkInRepository.isCheckIn("yunseong2")
+            checkInRepository.isCheckIn()
                 .onSuccess { result ->
                     _state.update {
                         it.copy(
@@ -79,7 +79,7 @@ class HomeViewModel(
     private fun checkIn() {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
-            checkInRepository.checkIn("yunseong2")
+            checkInRepository.checkIn()
                 .onSuccess {
                     _state.update { it.copy(isLoading = false, isCheckedIn = true) }
                     _effect.emit(HomeEffect.ShowToast("출석이 완료되었습니다."))

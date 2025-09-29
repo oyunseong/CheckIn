@@ -16,7 +16,6 @@ class HistoryViewModel(
     private val _uiState = MutableStateFlow(HistoryUiState())
     val uiState: StateFlow<HistoryUiState> = _uiState.asStateFlow()
 
-    private val userId = "yunseong2"
 
     init {
         loadHistory()
@@ -26,7 +25,7 @@ class HistoryViewModel(
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, error = null)
 
-            checkInRepository.getHistory(userId)
+            checkInRepository.getHistory()
                 .onSuccess { records ->
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,

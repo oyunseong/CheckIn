@@ -2,6 +2,7 @@ package yun.checkin.core.data
 
 import kotlinx.datetime.TimeZone.Companion.currentSystemDefault
 import kotlinx.datetime.toLocalDateTime
+import yun.checkin.FirebaseAuth
 import yun.checkin.FirebaseFirestore
 import yun.checkin.core.data_api.AttendanceRecord
 import yun.checkin.core.data_api.CheckInRepository
@@ -10,15 +11,18 @@ import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
 @OptIn(ExperimentalTime::class)
-class FakeCheckInRepositoryImpl : CheckInRepository {
-    private val firestore = FirebaseFirestore()
+class CheckInRepositoryImpl(
+    private val firestore: FirebaseFirestore,
+    private val firebaseAuth: FirebaseAuth
+) : CheckInRepository {
 
-    override suspend fun checkIn(userId: String): Result<Unit> {
+    override suspend fun checkIn(): Result<Unit> {
+        val uuid = firebaseAuth.getCurrentUUID() ?: return Result.failure(IllegalStateException("User not logged in"))
         val currentTime = Clock.System.now().epochSeconds * 1000
         val saveResult = firestore.saveData(
             collection = "user_attendance",
             data = mapOf(
-                "user_id" to userId,
+                "user_id" to uuid,
                 "attendance_time" to currentTime
             )
         )
@@ -30,12 +34,13 @@ class FakeCheckInRepositoryImpl : CheckInRepository {
         }
     }
 
-    override suspend fun isCheckIn(userId: String): Result<Boolean> {
+    override suspend fun isCheckIn(): Result<Boolean> {
         return try {
+            val uuid = firebaseAuth.getCurrentUUID() ?: return Result.failure(IllegalStateException("User not logged in"))
             val documentsResult = firestore.queryData(
                 collection = "user_attendance",
                 field = "user_id",
-                value = userId
+                value = uuid
             )
 
             if (documentsResult.isEmpty()) {
@@ -60,12 +65,13 @@ class FakeCheckInRepositoryImpl : CheckInRepository {
         }
     }
 
-    override suspend fun getHistory(userId: String): Result<List<AttendanceRecord>> {
+    override suspend fun getHistory(): Result<List<AttendanceRecord>> {
         return try {
+            val uuid = firebaseAuth.getCurrentUUID() ?: return Result.failure(IllegalStateException("User not logged in"))
             val documentsResult = firestore.queryData(
                 collection = "user_attendance",
                 field = "user_id",
-                value = userId
+                value = uuid
             )
 
             val attendanceRecords = documentsResult.mapNotNull { doc ->

@@ -12,7 +12,7 @@ class AuthRepositoryImpl : AuthRepository {
     private val firebaseAuth = FirebaseAuth()
 
     override suspend fun getCurrentUser(): User? {
-        val firebaseUser = firebaseAuth.getCurrentUser()
+        val firebaseUser = firebaseAuth.getCurrentUUID()
         return firebaseUser?.let {
             User(
                 uid = it, // TODO UUID
@@ -44,6 +44,7 @@ class AuthRepositoryImpl : AuthRepository {
     }
 
     override suspend fun isSignedIn(): Boolean {
-        return false // TODO 구현
+        println("uuid : ${firebaseAuth.getCurrentUUID()}")
+        return firebaseAuth.getCurrentUUID() != null
     }
 }

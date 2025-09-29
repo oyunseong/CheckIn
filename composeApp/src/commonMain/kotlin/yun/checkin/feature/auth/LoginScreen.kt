@@ -18,9 +18,9 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun LoginScreen(
     modifier: Modifier = Modifier,
-    viewModel: AuthViewModel,
     onNavigateToSignUp: () -> Unit,
-    onLoginSuccess: () -> Unit
+    onLoginSuccess: () -> Unit,
+    viewModel: AuthViewModel
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var email by remember { mutableStateOf("") }

@@ -3,10 +3,7 @@ package yun.checkin
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -15,10 +12,10 @@ import org.koin.core.KoinApplication
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.KoinAppDeclaration
 import org.koin.dsl.module
-import yun.checkin.core.data.AuthRepositoryImpl
-import yun.checkin.core.data.FakeCheckInRepositoryImpl
 import yun.checkin.core.data_api.AuthRepository
 import yun.checkin.core.data_api.CheckInRepository
+import yun.checkin.core.data.AuthRepositoryImpl
+import yun.checkin.core.data.CheckInRepositoryImpl
 import yun.checkin.feature.auth.AuthViewModel
 import yun.checkin.feature.auth.LoginScreen
 import yun.checkin.feature.auth.SignUpScreen
@@ -93,7 +90,13 @@ internal fun App(
 }
 
 internal val appModule = module {
-    single<CheckInRepository> { FakeCheckInRepositoryImpl() }
+    // Firebase expect 클래스들을 등록
+    single { FirebaseFirestore() }
+    single { FirebaseAuth() }
+
+    // CheckInRepositoryImpl에 의존성 주입
+    single<CheckInRepository> { CheckInRepositoryImpl(get(), get()) }
+
     single<AuthRepository> { AuthRepositoryImpl() }
     viewModelOf(::HomeViewModel)
     viewModelOf(::HistoryViewModel)

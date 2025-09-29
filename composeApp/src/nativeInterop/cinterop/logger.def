@@ -1,5 +1,0 @@
-language = Objective-C
-package = yun.checkin.logger
-headers = Logger.h
-compilerOpts = -framework Foundation
-linkerOpts = -framework Foundation -ObjC

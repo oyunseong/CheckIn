@@ -1,54 +1,94 @@
 package yun.checkin
 
+import com.google.firebase.auth.FirebaseAuth as AndroidFirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore as AndroidFirebaseFirestore
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
-import com.google.firebase.auth.FirebaseAuth as GoogleFirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore as GoogleFirebaseFirestore
+import kotlin.coroutines.resumeWithException
 
+// Android에서 실제 Firebase Android SDK 사용
 actual class FirebaseAuth {
-    private val auth = GoogleFirebaseAuth.getInstance()
+
+    private val auth = AndroidFirebaseAuth.getInstance()
 
     actual fun getCurrentUser(): String? {
-        return auth.currentUser?.uid
+        println("🔐 Android Firebase Auth - getCurrentUser() called")
+        val result = auth.currentUser?.uid
+        println("👤 Android Firebase Auth - getCurrentUser result: $result")
+        return result
     }
 
-    actual suspend fun signIn(email: String, password: String): Boolean =
-        suspendCoroutine { continuation ->
-            auth.signInWithEmailAndPassword(email, password)
-                .addOnCompleteListener { task ->
-                    continuation.resume(task.isSuccessful)
-                }
+    actual suspend fun signIn(email: String, password: String): Boolean {
+        println("🔐 Android Firebase Auth - signIn() called for email: $email")
+
+        return try {
+            val result = auth.signInWithEmailAndPassword(email, password).await()
+            val success = result.user != null
+            println("✅ Android Firebase Auth - signIn success: $success")
+            success
+        } catch (e: Exception) {
+            println("❌ Android Firebase Auth - signIn failed: ${e.message}")
+            throw e
         }
+    }
 }
 
 actual class FirebaseFirestore {
-    private val firestore = GoogleFirebaseFirestore.getInstance()
 
-    actual suspend fun saveData(collection: String, data: Map<String, Any>): Result<Unit> {
-        return firestore.collection(collection)
-            .add(data)
-            .await()
-            .let { Result.success(Unit) }
+    private val firestore = AndroidFirebaseFirestore.getInstance()
+
+    actual suspend fun saveData(collection: String, data: Map<String, Any>): Result<String> {
+        println("💾 Android Firestore - saveData() to collection: $collection")
+
+        return try {
+            val documentRef = firestore.collection(collection).add(data).await()
+            println("✅ Android Firestore - saveData success, document ID: ${documentRef.id}")
+            Result.success("Document saved successfully with ID: ${documentRef.id}")
+        } catch (e: Exception) {
+            println("❌ Android Firestore - saveData failed: ${e.message}")
+            Result.failure(e)
+        }
     }
 
     actual suspend fun getData(collection: String, documentId: String): Map<String, Any>? {
-        return firestore.collection(collection)
-            .document(documentId)
-            .get()
-            .await()
-            .data
+        println("📄 Android Firestore - getData() from $collection/$documentId")
+
+        return try {
+            val document = firestore.collection(collection).document(documentId).get().await()
+            if (document.exists()) {
+                val data = document.data
+                println("✅ Android Firestore - getData success, keys: ${data?.keys}")
+                data
+            } else {
+                println("🚫 Android Firestore - getData: document not found")
+                null
+            }
+        } catch (e: Exception) {
+            println("❌ Android Firestore - getData failed: ${e.message}")
+            throw e
+        }
     }
 
-    actual suspend fun getDocuments(
+    actual suspend fun queryData(
         collection: String,
         field: String,
         value: Any
-    ): List<Map<String, Any?>?> {
-        return firestore.collection(collection)
-            .whereEqualTo(field, value)
-            .get()
-            .await()
-            .documents.map { it.data }
+    ): List<Map<String, Any>> {
+        println("🔍 Android Firestore - queryData() in $collection where $field == $value")
+
+        return try {
+            val querySnapshot = firestore.collection(collection)
+                .whereEqualTo(field, value)
+                .get()
+                .await()
+
+            val documents = querySnapshot.documents.mapNotNull { it.data }
+            println("✅ Android Firestore - queryData success, found ${documents.size} documents")
+            documents
+        } catch (e: Exception) {
+            println("❌ Android Firestore - queryData failed: ${e.message}")
+            throw e
+        }
     }
 }

@@ -15,49 +15,62 @@ class FakeCheckInRepositoryImpl : CheckInRepository {
 
     override suspend fun checkIn(userId: String): Result<Unit> {
         val currentTime = Clock.System.now().epochSeconds * 1000
-        return firestore.saveData(
+        val saveResult = firestore.saveData(
             collection = "user_attendance",
             data = mapOf(
                 "user_id" to userId,
                 "attendance_time" to currentTime
             )
         )
+
+        return if (saveResult.isSuccess) {
+            Result.success(Unit)
+        } else {
+            Result.failure(saveResult.exceptionOrNull()!!)
+        }
     }
 
     override suspend fun isCheckIn(userId: String): Result<Boolean> {
-        val documentsResult = firestore.getDocuments(
-            collection = "user_attendance",
-            field = "user_id",
-            value = userId
-        )
-        if (documentsResult.isEmpty()) return Result.success(false)
+        return try {
+            val documentsResult = firestore.queryData(
+                collection = "user_attendance",
+                field = "user_id",
+                value = userId
+            )
 
-        val today = Clock.System.now().toLocalDateTime(currentSystemDefault()).date
+            if (documentsResult.isEmpty()) {
+                return Result.success(false)
+            }
 
-        val hasCheckedInToday = documentsResult.any { doc ->
-            val attendanceTimeMillis = doc?.get("attendance_time") as? Long ?: return@any false
+            val today = Clock.System.now().toLocalDateTime(currentSystemDefault()).date
 
-            val checkInDate = Instant.fromEpochMilliseconds(attendanceTimeMillis)
-                .toLocalDateTime(currentSystemDefault())
-                .date
+            val hasCheckedInToday = documentsResult.any { doc ->
+                val attendanceTimeMillis = doc["attendance_time"] as? Long ?: return@any false
 
-            checkInDate == today
+                val checkInDate = Instant.fromEpochMilliseconds(attendanceTimeMillis)
+                    .toLocalDateTime(currentSystemDefault())
+                    .date
+
+                checkInDate == today
+            }
+
+            Result.success(hasCheckedInToday)
+        } catch (e: Exception) {
+            Result.failure(e)
         }
-
-        return Result.success(hasCheckedInToday)
     }
 
     override suspend fun getHistory(userId: String): Result<List<AttendanceRecord>> {
         return try {
-            val documentsResult = firestore.getDocuments(
+            val documentsResult = firestore.queryData(
                 collection = "user_attendance",
                 field = "user_id",
                 value = userId
             )
 
             val attendanceRecords = documentsResult.mapNotNull { doc ->
-                val attendanceTimeMillis = doc?.get("attendance_time") as? Long
-                val userIdFromDoc = doc?.get("user_id") as? String
+                val attendanceTimeMillis = doc["attendance_time"] as? Long
+                val userIdFromDoc = doc["user_id"] as? String
 
                 if (attendanceTimeMillis != null && userIdFromDoc != null) {
                     val attendanceTime = Instant.fromEpochMilliseconds(attendanceTimeMillis)

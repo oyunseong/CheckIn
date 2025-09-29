@@ -39,14 +39,10 @@ kotlin {
 
         // 공식 문서 방식에 따른 cinterop 설정
         iosTarget.compilations.getByName("main") {
-            val logger by cinterops.creating {
-                // .def 파일 경로 (src/nativeInterop/cinterop/ 디렉토리에 있으면 생략 가능)
-                definitionFile.set(project.file("src/nativeInterop/cinterop/logger.def"))
-                // 헤더 파일 검색 디렉토리 설정
+            val firebaseHelper by cinterops.creating {
+                definitionFile.set(project.file("src/nativeInterop/cinterop/firebaseHelper.def"))
                 includeDirs("src/nativeInterop/cinterop")
-                // iOS 앱 모듈과 연결
                 compilerOpts("-framework", "Foundation")
-                // iOS 앱의 Swift 심볼에 접근하기 위한 설정
                 compilerOpts("-I$projectDir/../iosApp/iosApp")
             }
         }

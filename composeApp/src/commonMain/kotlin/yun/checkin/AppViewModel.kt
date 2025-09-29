@@ -86,7 +86,7 @@ internal class AppViewModel : ViewModel() {
     /**
      * 데이터 저장 테스트
      */
-    suspend fun testSaveData(): Result<Unit> {
+    suspend fun testSaveData(): Result<String> {
         return firestore.saveData(
             "test", mapOf(
                 "timestamp" to 1234567890L,
@@ -105,7 +105,7 @@ internal class AppViewModel : ViewModel() {
     /**
      * 문서 검색 테스트
      */
-    suspend fun testQueryDocuments(field: String, value: Any): List<Map<String, Any?>?> {
-        return firestore.getDocuments("test", field, value)
+    suspend fun testQueryDocuments(field: String, value: Any): List<Map<String, Any>> {
+        return firestore.queryData("test", field, value)
     }
 }

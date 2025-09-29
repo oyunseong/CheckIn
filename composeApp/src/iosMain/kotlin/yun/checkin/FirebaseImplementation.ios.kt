@@ -1,65 +1,51 @@
 package yun.checkin
 
 import kotlinx.cinterop.ExperimentalForeignApi
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.suspendCancellableCoroutine
+import yun.checkin.firebase.FirebaseHelper
 import kotlin.coroutines.resume
-import yun.checkin.logger.*
+import kotlin.coroutines.resumeWithException
 
-// iOS에서 cinterop를 통한 Swift Firebase 구현
-// Android와 동일한 API 제공
+// iOS에서 Swift Firebase Helper를 사용한 실제 구현
+// 임시로 Logger 대신 println 사용 (cinterop 바인딩 문제 해결 전까지)
+
 @OptIn(ExperimentalForeignApi::class)
 actual class FirebaseAuth {
 
     actual fun getCurrentUser(): String? {
-        Logger.log("🔐 Firebase Auth - getCurrentUser() called")
+        FirebaseHelper.log("🔐 iOS Firebase Auth - getCurrentUser() called")
 
-        try {
-            return getCurrentUserFromSwift()
+        // TODO: Swift에서 Auth 메서드 활성화 후 사용
+        // return FirebaseHelper.getCurrentUser()
+
+        // 임시 시뮬레이션
+        val result = "ios_user_12345"
+        FirebaseHelper.log("👤 iOS Firebase Auth - getCurrentUser result: $result")
+        return result
+    }
+
+    actual suspend fun signIn(email: String, password: String): Boolean {
+        FirebaseHelper.log("🔐 iOS Firebase Auth - signIn() called for email: $email")
+
+        return try {
+            // TODO: Swift에서 Auth 메서드 활성화 후 사용
+            // val result = suspendCancellableCoroutine<Boolean> { continuation ->
+            //     FirebaseHelper.signInWithEmail(email, password) { success, error ->
+            //         if (error != null) {
+            //             continuation.resumeWithException(Exception(error))
+            //         } else {
+            //             continuation.resume(success)
+            //         }
+            //     }
+            // }
+
+            // 임시 시뮬레이션
+            val success = email.isNotEmpty() && password.length >= 6
+            FirebaseHelper.log("✅ iOS Firebase Auth - signIn success: $success")
+            success
         } catch (e: Exception) {
-            Logger.log("❌ Firebase Auth - getCurrentUser() failed: ${e.message}")
-            return null
-        }
-    }
-
-    actual suspend fun signIn(email: String, password: String): Boolean =
-        suspendCancellableCoroutine { continuation ->
-            Logger.log("🔐 Firebase Auth - signIn() called for email: $email")
-
-            try {
-                signInWithSwift(email, password) { success, error ->
-                    if (error != null) {
-                        Logger.log("❌ Firebase Auth - signIn() failed: $error")
-                        continuation.resume(false)
-                    } else {
-                        Logger.log("✅ Firebase Auth - signIn() success: $success")
-                        continuation.resume(success)
-                    }
-                }
-            } catch (e: Exception) {
-                Logger.log("❌ Firebase Auth - signIn() exception: ${e.message}")
-                continuation.resume(false)
-            }
-        }
-
-    private fun getCurrentUserFromSwift(): String? {
-        val userId = "ios_user_12345"
-        Logger.log("👤 Swift Mock - returning user: $userId")
-        return userId
-    }
-
-    private fun signInWithSwift(
-        email: String,
-        password: String,
-        completion: (Boolean, String?) -> Unit
-    ) {
-        Logger.log("🔍 Swift Mock - validating email: $email")
-        if (email.isNotEmpty() && password.length >= 6) {
-            Logger.log("✅ Swift Mock - validation passed")
-            completion(true, null)
-        } else {
-            Logger.log("❌ Swift Mock - validation failed")
-            completion(false, "Invalid email or password")
+            FirebaseHelper.log("❌ iOS Firebase Auth - signIn failed: ${e.message}")
+            throw e
         }
     }
 }
@@ -67,102 +53,107 @@ actual class FirebaseAuth {
 @OptIn(ExperimentalForeignApi::class)
 actual class FirebaseFirestore {
 
-    actual suspend fun saveData(collection: String, data: Map<String, Any>): Result<Unit> {
-        Logger.log("💾 Firebase Firestore - saveData() called for collection: $collection")
+    actual suspend fun saveData(collection: String, data: Map<String, Any>): Result<String> {
+        FirebaseHelper.log("💾 iOS Firestore - saveData() to collection: $collection")
 
         return try {
-            saveDataWithSwift(collection, data)
-            Logger.log("✅ Firebase Firestore - saveData() success")
-            Result.success(Unit)
+            // 실제 Swift FirebaseHelper 사용!
+            val result = suspendCancellableCoroutine<String> { continuation ->
+                // Kotlin Map을 NSDictionary로 변환
+                val nsData = data as Map<Any?, Any?>
+
+                FirebaseHelper.saveDataWithCollection(collection, nsData) { success, error ->
+                    if (error != null) {
+                        FirebaseHelper.log("❌ iOS Firestore - saveData failed: $error")
+                        continuation.resumeWithException(Exception(error))
+                    } else if (success) {
+                        FirebaseHelper.log("✅ iOS Firestore - saveData success via Swift!")
+                        continuation.resume("Document saved successfully via Swift Firebase")
+                    } else {
+                        FirebaseHelper.log("❌ iOS Firestore - saveData failed: unknown error")
+                        continuation.resumeWithException(Exception("Save failed"))
+                    }
+                }
+            }
+            Result.success(result)
         } catch (e: Exception) {
-            Logger.log("❌ Firebase Firestore - saveData() failed: ${e.message}")
+            FirebaseHelper.log("❌ iOS Firestore - saveData exception: ${e.message}")
             Result.failure(e)
         }
     }
 
     actual suspend fun getData(collection: String, documentId: String): Map<String, Any>? {
-        Logger.log("📖 Firebase Firestore - getData() called for doc: $documentId")
+        FirebaseHelper.log("📄 iOS Firestore - getData() from $collection/$documentId")
 
         return try {
-            val result = getDataFromSwift(collection, documentId)
-            Logger.log("✅ Firebase Firestore - getData() result: ${result?.keys}")
-            result
+            suspendCancellableCoroutine { continuation ->
+                FirebaseHelper.getDataWithCollection(collection, documentId) { data, error ->
+                    if (error != null) {
+                        FirebaseHelper.log("❌ iOS Firestore - getData failed: $error")
+                        continuation.resumeWithException(Exception(error))
+                    } else if (data != null) {
+                        FirebaseHelper.log("✅ iOS Firestore - getData success via Swift!, keys: ${data.keys}")
+                        // NSDictionary를 Map<String, Any>로 안전하게 변환
+                        val kotlinMap = (data as? Map<*, *>)?.mapNotNull { (key, value) ->
+                            val keyStr = key as? String ?: return@mapNotNull null
+                            keyStr to (value ?: "null")
+                        }?.toMap() ?: emptyMap()
+                        continuation.resume(kotlinMap)
+                    } else {
+                        FirebaseHelper.log("🚫 iOS Firestore - getData: document not found")
+                        continuation.resume(null)
+                    }
+                }
+            }
         } catch (e: Exception) {
-            Logger.log("❌ Firebase Firestore - getData() failed: ${e.message}")
-            null
+            FirebaseHelper.log("❌ iOS Firestore - getData failed: ${e.message}")
+            throw e
         }
     }
 
-    actual suspend fun getDocuments(
+    actual suspend fun queryData(
         collection: String,
         field: String,
         value: Any
-    ): List<Map<String, Any?>?> {
-        Logger.log("📚 Firebase Firestore - getDocuments() called for $field=$value")
+    ): List<Map<String, Any>> {
+        FirebaseHelper.log("🔍 iOS Firestore - queryData() in $collection where $field == $value")
 
         return try {
-            val result = getDocumentsFromSwift(collection, field, value)
-            Logger.log("✅ Firebase Firestore - getDocuments() found ${result.size} documents")
-            result
+            suspendCancellableCoroutine { continuation ->
+                val queryValue = when (value) {
+                    is String -> value
+                    is Number -> value
+                    is Boolean -> value
+                    else -> value.toString()
+                }
+
+                FirebaseHelper.getDocumentsWithCollection(
+                    collection,
+                    field,
+                    queryValue
+                ) { documents, error ->
+                    if (error != null) {
+                        FirebaseHelper.log("❌ iOS Firestore - queryData failed: $error")
+                        continuation.resumeWithException(Exception(error))
+                    } else if (documents != null) {
+                        FirebaseHelper.log("✅ iOS Firestore - queryData success via Swift!, found ${documents.size} documents")
+                        // Array<NSDictionary>를 List<Map<String, Any>>로 안전하게 변환
+                        val kotlinList = (documents as? List<*>)?.mapNotNull { doc ->
+                            (doc as? Map<*, *>)?.mapNotNull { (key, docValue) ->
+                                val keyStr = key as? String ?: return@mapNotNull null
+                                keyStr to (docValue ?: "null")
+                            }?.toMap()
+                        } ?: emptyList()
+                        continuation.resume(kotlinList)
+                    } else {
+                        FirebaseHelper.log("🚫 iOS Firestore - queryData: no documents found")
+                        continuation.resume(emptyList())
+                    }
+                }
+            }
         } catch (e: Exception) {
-            Logger.log("❌ Firebase Firestore - getDocuments() failed: ${e.message}")
-            emptyList()
+            FirebaseHelper.log("❌ iOS Firestore - queryData failed: ${e.message}")
+            throw e
         }
-    }
-
-    private suspend fun saveDataWithSwift(collection: String, data: Map<String, Any>) {
-        Logger.log("📤 Swift Mock - saving data to $collection: ${data.keys}")
-        delay(500)
-        Logger.log("✅ Swift Mock - save completed")
-    }
-
-    private suspend fun getDataFromSwift(
-        collection: String,
-        documentId: String
-    ): Map<String, Any>? {
-        Logger.log("📥 Swift Mock - getting data from $collection/$documentId")
-        delay(300)
-
-        return if (documentId == "nonexistent") {
-            Logger.log("🚫 Swift Mock - document not found")
-            null
-        } else {
-            val result = mapOf(
-                "id" to documentId,
-                "data" to "swift_firebase_data",
-                "timestamp" to 1234567890L,
-                "platform" to "ios"
-            )
-            Logger.log("✅ Swift Mock - returning data: ${result.keys}")
-            result
-        }
-    }
-
-    private suspend fun getDocumentsFromSwift(
-        collection: String,
-        field: String,
-        value: Any
-    ): List<Map<String, Any?>?> {
-        Logger.log("📊 Swift Mock - querying $collection where $field=$value")
-        delay(400)
-
-        val result = listOf(
-            mapOf(
-                "id" to "doc1_ios",
-                field to value,
-                "timestamp" to 1234567890L,
-                "platform" to "ios"
-            ),
-            mapOf(
-                "id" to "doc2_ios",
-                field to value,
-                "timestamp" to 1234567889L,
-                "platform" to "ios"
-            ),
-            null
-        )
-
-        Logger.log("📋 Swift Mock - returning ${result.size} documents")
-        return result
     }
 }

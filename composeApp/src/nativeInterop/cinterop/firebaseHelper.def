@@ -1,0 +1,5 @@
+language = Objective-C
+package = yun.checkin.firebase
+headers = FirebaseHelper.h
+compilerOpts = -framework Foundation -framework FirebaseFirestore -framework FirebaseAuth
+linkerOpts = -framework Foundation -framework FirebaseFirestore -framework FirebaseAuth -ObjC

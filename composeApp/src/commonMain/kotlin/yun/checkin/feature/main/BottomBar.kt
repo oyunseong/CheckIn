@@ -17,13 +17,22 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import checkin.composeapp.generated.resources.Res
-import checkin.composeapp.generated.resources.ic_more
+import checkin.composeapp.generated.resources.ic_article_person
+import checkin.composeapp.generated.resources.ic_settings
+import checkin.composeapp.generated.resources.ic_verified
+import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
+
+enum class MainTabs(val icon: DrawableResource) {
+    Home(Res.drawable.ic_verified),
+    History(Res.drawable.ic_article_person),
+    Setting(Res.drawable.ic_settings)
+}
 
 @Composable
 fun BottomBar(
     modifier: Modifier = Modifier,
-    tabs: List<String>,
+    tabs: List<MainTabs>,
     currentTab: String?,
     onClick: (String) -> Unit = {}
 ) {
@@ -42,23 +51,15 @@ fun BottomBar(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxHeight()
-                    .clickable { onClick(it) },
+                    .clickable { onClick(it.name) },
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    painter = painterResource(Res.drawable.ic_more),
-                    tint = if (currentTab == it) Color.Black else Color.Gray,
-                    contentDescription = it
+                    painter = painterResource(it.icon),
+                    tint = if (currentTab == it.name) Color.Black else Color.Gray,
+                    contentDescription = it.name
                 )
             }
-
-//            Text(
-//                modifier = Modifier.weight(1f)
-//                    .clickable { onClick(it) },
-//                text = it,
-//                textAlign = TextAlign.Center,
-//                color = if (currentTab == it) Color.Black else Color.Gray
-//            )
         }
     }
 }

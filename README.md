@@ -1,10 +1,5 @@
 # 📆 출석체크 앱 (Kotlin Multiplatform)
 
-<p align="center">
-  <img src="screenshots/Screenshot_20250929_191420.jpeg" width="250" />
-  <img src="screenshots/Screenshot_20250929_191504.jpeg" width="250" />
-</p>
-
 ## 개요
 
 **출석체크 앱**은 Kotlin Multiplatform 기반으로 개발된 출석 관리 앱입니다. 

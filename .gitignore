@@ -6323,3 +6323,8 @@ captures
 /iosApp/Pods/Manifest.lock
 /iosApp/Podfile
 /iosApp/Podfile.lock
+
+# Release keystore files
+*.keystore
+*.jks
+key.properties

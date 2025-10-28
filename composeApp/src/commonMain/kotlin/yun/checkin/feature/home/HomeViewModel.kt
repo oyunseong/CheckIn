@@ -12,10 +12,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import yun.checkin.core.data_api.CheckInRepository
+import yun.checkin.core.data_api.NotificationManager
 import yun.checkin.util.getCurrentFormattedTime
 
 class HomeViewModel(
-    private val checkInRepository: CheckInRepository
+    private val checkInRepository: CheckInRepository,
+    private val notificationManager: NotificationManager
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(HomeState())
@@ -83,6 +85,14 @@ class HomeViewModel(
                 .onSuccess {
                     _state.update { it.copy(isLoading = false, isCheckedIn = true) }
                     _effect.emit(HomeEffect.ShowToast("출석이 완료되었습니다."))
+
+                    // 출근 기록 성공 시 8시간 30분 후 알림 스케줄링
+                    try {
+                        notificationManager.scheduleWorkEndNotification()
+                        println("Work end notification scheduled for 8.5 hours from now")
+                    } catch (e: Exception) {
+                        println("Failed to schedule work end notification: ${e.message}")
+                    }
                 }
                 .onFailure { error ->
                     _state.update { it.copy(isLoading = false, error = error.message) }

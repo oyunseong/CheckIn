@@ -3,12 +3,11 @@ package yun.checkin.feature.main
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -17,40 +16,36 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import checkin.composeapp.generated.resources.Res
-import checkin.composeapp.generated.resources.ic_article_person
+import checkin.composeapp.generated.resources.ic_calendar
+import checkin.composeapp.generated.resources.ic_exit
 import checkin.composeapp.generated.resources.ic_settings
-import checkin.composeapp.generated.resources.ic_verified
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
+import world.pople.oper.core.designsystem.theme.White
 
 enum class MainTabs(val icon: DrawableResource) {
-    Home(Res.drawable.ic_verified),
-    History(Res.drawable.ic_article_person),
+    Home(Res.drawable.ic_exit),
+    History(Res.drawable.ic_calendar),
     Setting(Res.drawable.ic_settings)
 }
 
 @Composable
-fun BottomBar(
+fun BottomNavigator(
     modifier: Modifier = Modifier,
     tabs: List<MainTabs>,
     currentTab: String?,
     onClick: (String) -> Unit = {}
 ) {
-    Row(
-        modifier = modifier
-            .background(Color.Transparent)
-            .padding(horizontal = 16.dp, vertical = 12.dp)
-            .clip(RoundedCornerShape(12.dp))
-            .fillMaxWidth()
-            .height(56.dp)
-            .background(Color.White),
-        verticalAlignment = Alignment.CenterVertically
+    Column(
+        modifier = modifier.background(Color.Transparent),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        tabs.forEach {
+        tabs.forEachIndexed { i, it ->
             Box(
                 modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
+                    .clip(CircleShape)
+                    .background(White)
+                    .size(58.dp)
                     .clickable { onClick(it.name) },
                 contentAlignment = Alignment.Center
             ) {
@@ -60,6 +55,7 @@ fun BottomBar(
                     contentDescription = it.name
                 )
             }
+            if (i != tabs.lastIndex) Spacer(modifier = Modifier.height(22.dp))
         }
     }
 }

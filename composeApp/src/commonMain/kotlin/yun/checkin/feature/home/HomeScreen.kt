@@ -124,6 +124,7 @@ fun HomeScreen(
             verticalArrangement = Arrangement.Bottom,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            // TODO 화면 사이즈로 가변 처리
             val bottomPadding = if (state.workStatus == WorkStatus.CHECKED_IN) 100.dp else 0.dp
             Image(
                 painter = painterResource(Res.drawable.ic_sun),
@@ -166,9 +167,9 @@ fun getSunColor(timeOfDay: TimeOfDay): Brush {
     return when (timeOfDay) {
         TimeOfDay.NIGHT -> Brush.verticalGradient(
             colorStops = arrayOf(
-                0f to Color(0xFF816D27),       // 나머지는 그레이
+                0f to Color(0xFFFFEFB4),       // 나머지는 그레이
                 0.2f to Color(0xFFFFDB59),      // 20% 지점에서 그레이로 변경
-                1f to Color(0xFFFFEFB4)      // 상단 색상
+                1f to Color(0xFF816D27)      // 상단 색상
             ),
             startY = 0f,
         )

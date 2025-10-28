@@ -1,47 +1,52 @@
 package yun.checkin.feature.home
 
-import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import checkin.composeapp.generated.resources.Res
+import checkin.composeapp.generated.resources.ic_sun
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
-import yun.checkin.core.utils.DateFormatter
-import kotlin.time.Clock
-import kotlin.time.ExperimentalTime
+import yun.checkin.core.designsystem.Blue
+import yun.checkin.core.designsystem.Gray
+import yun.checkin.core.designsystem.Orange
+import yun.checkin.core.designsystem.Red
+import yun.checkin.core.designsystem.Yellow
+import yun.checkin.feature.home.component.BuildingImage
+import yun.checkin.feature.home.component.TimeDisplay
+import yun.checkin.feature.home.component.WorkStatusHeader
+import yun.checkin.feature.home.model.HomeSideEffect
+import yun.checkin.feature.home.model.HomeUiEvent
+import yun.checkin.feature.home.model.HomeUiState
+import yun.checkin.feature.home.model.TimeOfDay
+import yun.checkin.feature.home.model.WorkStatus
 
 @Composable
 fun HomeScreen(
@@ -49,12 +54,12 @@ fun HomeScreen(
     padding: PaddingValues,
     viewModel: HomeViewModel = koinViewModel(),
 ) {
-    val state by viewModel.state.collectAsStateWithLifecycle()
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
-        viewModel.effect.collectLatest {
+        viewModel.sideEffect.collectLatest {
             when (it) {
-                is HomeEffect.ShowToast -> {
+                is HomeSideEffect.ShowToast -> {
 //                    snackbarHostState.showSnackbar(it.message)
                 }
             }
@@ -73,17 +78,22 @@ fun HomeScreen(
 fun HomeScreen(
     modifier: Modifier = Modifier,
     padding: PaddingValues = PaddingValues(),
-    state: HomeState = HomeState(),
-    onIntent: (HomeIntent) -> Unit = {}
+    state: HomeUiState = HomeUiState(),
+    onIntent: (HomeUiEvent) -> Unit = {}
 ) {
+    val textColor = if (state.workStatus == WorkStatus.NOT_CHECKED_IN) Gray else getTextColor(
+        state.timeOfDay
+    )
+    // 화면 사이즈
+
     Box(
         modifier = modifier
             .fillMaxSize()
             .background(
                 brush = Brush.verticalGradient(
-                    colors = listOf(
-                        Color(0xFF6A11CB),
-                        Color(0xFF2575FC)
+                    colorStops = arrayOf(
+                        0.0f to Color(0xFFccdaec),
+                        1f to Color(0xFFeaeaea)
                     )
                 )
             )
@@ -95,133 +105,101 @@ fun HomeScreen(
                     .fillMaxSize()
                     .padding(horizontal = 16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.SpaceAround
             ) {
-                Header()
-                TimeDisplay(state.currentTime)
-                CheckInStatus(state.isCheckedIn)
-                CheckInButton(
-                    isLoading = state.isLoading,
-                    isCheckedIn = state.isCheckedIn,
-                    onClick = { onIntent(HomeIntent.OnCheckInClick) }
+                Spacer(modifier = Modifier.height(94.dp))
+                WorkStatusHeader(
+                    workStatus = state.workStatus,
+                    textColor = textColor
+                )
+                Spacer(modifier = Modifier.height(38.dp))
+                TimeDisplay(
+                    time = state.currentTime,
+                    textColor = textColor
                 )
             }
-
         }
 
-    }
-}
-
-@OptIn(ExperimentalTime::class)
-@Composable
-private fun Header() {
-    val now = Clock.System.now()
-    val localDateTime = now.toLocalDateTime(TimeZone.currentSystemDefault())
-
-    // DateFormatter를 사용하여 날짜 포맷팅
-    val dateString = DateFormatter.toKoreanDate(localDateTime)
-    val dayOfWeek = DateFormatter.getDayOfWeekKorean(localDateTime)
-
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(
-            text = "출석체크",
-            style = MaterialTheme.typography.headlineLarge,
-            color = Color.White,
-            fontWeight = FontWeight.Bold
-        )
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(
-            text = "$dateString ($dayOfWeek)",
-            style = MaterialTheme.typography.bodyLarge,
-            color = Color.White.copy(alpha = 0.8f)
-        )
-    }
-}
-
-/**
- * LocalDateTime을 "yyyy년 MM월 dd일" 포맷으로 변환하는 함수
- * @deprecated DateFormatter.toKoreanDate()를 사용하세요
- */
-@Deprecated("Use DateFormatter.toKoreanDate() instead")
-private fun formatDateToKorean(dateTime: kotlinx.datetime.LocalDateTime): String {
-    val year = dateTime.year
-    val month = dateTime.monthNumber.toString().padStart(2, '0')
-    val day = dateTime.dayOfMonth.toString().padStart(2, '0')
-
-    return "${year}년 ${month}월 ${day}일"
-}
-
-@Composable
-private fun TimeDisplay(time: String) {
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = Modifier
-            .clip(CircleShape)
-            .background(Color.White.copy(alpha = 0.1f))
-            .padding(30.dp)
-    ) {
-        Text(
-            text = time,
-            fontSize = 48.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color.White
-        )
-    }
-}
-
-@Composable
-private fun CheckInStatus(isCheckedIn: Boolean) {
-    val statusText = if (isCheckedIn) "오늘은 출석 완료! ✅" else "아직 출석 전입니다."
-    val statusColor = if (isCheckedIn) Color(0xFF4CAF50) else Color.White.copy(alpha = 0.9f)
-
-    Card(
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.2f)),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-    ) {
-        Text(
-            text = statusText,
-            modifier = Modifier.padding(horizontal = 24.dp, vertical = 12.dp),
-            style = MaterialTheme.typography.titleMedium,
-            color = statusColor,
-            fontWeight = FontWeight.Medium
-        )
-    }
-}
-
-@Composable
-private fun CheckInButton(
-    isLoading: Boolean,
-    isCheckedIn: Boolean,
-    onClick: () -> Unit
-) {
-    val buttonEnabled = !isLoading && !isCheckedIn
-    val animatedAlpha by animateFloatAsState(if (buttonEnabled) 1f else 0.5f)
-
-    Button(
-        onClick = onClick,
-        enabled = buttonEnabled,
-        modifier = Modifier.fillMaxWidth()
-            .height(56.dp),
-        shape = RoundedCornerShape(16.dp),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = Color(0xFFFFC107),
-            contentColor = Color.Black,
-            disabledContainerColor = Color.Gray.copy(alpha = 0.5f)
-        )
-    ) {
-        if (isLoading) {
-            CircularProgressIndicator(
-                modifier = Modifier.size(24.dp),
-                color = Color.White,
-                strokeWidth = 2.dp
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Bottom,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            val bottomPadding = if (state.workStatus == WorkStatus.CHECKED_IN) 100.dp else 0.dp
+            Image(
+                painter = painterResource(Res.drawable.ic_sun),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(186.dp)
+                    .clip(CircleShape)
+                    .drawWithContent {
+                        drawContent()
+                        drawRect(
+                            getSunColor(state.timeOfDay),
+                            blendMode = BlendMode.SrcAtop
+                        )
+                    }
+                    .clickable {
+                        onIntent(HomeUiEvent.OnCheckInClick)
+                    }
             )
-        } else {
-            Text(
-                text = if (isCheckedIn) "출석 완료" else "출석하기",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.graphicsLayer(alpha = animatedAlpha)
+            Spacer(
+                modifier = Modifier.height(bottomPadding + 81.dp)
+            )
+        }
+        BuildingImage(
+            modifier = Modifier.align(Alignment.BottomCenter)
+        )
+    }
+}
+
+
+fun getTextColor(timeOfDay: TimeOfDay): Color {
+    return when (timeOfDay) {
+        TimeOfDay.NIGHT -> Yellow
+        TimeOfDay.MORNING -> Red
+        TimeOfDay.AFTERNOON -> Orange
+        TimeOfDay.EVENING -> Blue
+    }
+}
+
+fun getSunColor(timeOfDay: TimeOfDay): Brush {
+    return when (timeOfDay) {
+        TimeOfDay.NIGHT -> Brush.verticalGradient(
+            colorStops = arrayOf(
+                0f to Color(0xFF816D27),       // 나머지는 그레이
+                0.2f to Color(0xFFFFDB59),      // 20% 지점에서 그레이로 변경
+                1f to Color(0xFFFFEFB4)      // 상단 색상
+            ),
+            startY = 0f,
+        )
+
+        TimeOfDay.MORNING -> {
+            Brush.verticalGradient(
+                colorStops = arrayOf(
+                    0.0f to Red,
+                    1f to Red
+                ),
+                startY = 0f,
+            )
+        }
+
+        TimeOfDay.AFTERNOON -> {
+            Brush.verticalGradient(
+                colorStops = arrayOf(
+                    0.0f to Orange,
+                    1f to Orange
+                ),
+                startY = 0f,
+            )
+        }
+
+        TimeOfDay.EVENING -> {
+            Brush.verticalGradient(
+                colorStops = arrayOf(
+                    0.0f to Orange,
+                    1f to Orange
+                ),
+                startY = 0f,
             )
         }
     }

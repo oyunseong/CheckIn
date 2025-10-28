@@ -4,15 +4,19 @@ import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import yun.checkin.core.data_api.CheckInRepository
 import yun.checkin.core.data_api.NotificationManager
+import yun.checkin.feature.home.model.HomeSideEffect
+import yun.checkin.feature.home.model.HomeUiEvent
+import yun.checkin.feature.home.model.HomeUiState
+import yun.checkin.feature.home.model.WorkStatus
 import yun.checkin.util.getCurrentFormattedTime
 
 class HomeViewModel(
@@ -20,11 +24,11 @@ class HomeViewModel(
     private val notificationManager: NotificationManager
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(HomeState())
-    val state = _state.asStateFlow()
+    private val _uiState = MutableStateFlow(HomeUiState())
+    val uiState = _uiState.asStateFlow()
 
-    private val _effect = MutableSharedFlow<HomeEffect>()
-    val effect = _effect.asSharedFlow()
+    private val _sideEffect = Channel<HomeSideEffect>()
+    val sideEffect = _sideEffect.receiveAsFlow()
 
     private val viewModelScope = CoroutineScope(Dispatchers.Default)
 
@@ -43,18 +47,20 @@ class HomeViewModel(
         viewModelScope.launch(exceptionHandler) {
             checkInRepository.isCheckIn()
                 .onSuccess { result ->
-                    _state.update {
+                    _uiState.update {
                         it.copy(
                             isLoading = false,
+                            workStatus = if (result) WorkStatus.CHECKED_IN else WorkStatus.NOT_CHECKED_IN,
                             isCheckedIn = result
                         )
                     }
                 }
                 .onFailure {
                     // 실패한 경우에도 isLoading은 false로, 출석 상태는 false로 처리
-                    _state.update {
+                    _uiState.update {
                         it.copy(
                             isLoading = false,
+                            workStatus = WorkStatus.NOT_CHECKED_IN,
                             isCheckedIn = false
                         )
                     }
@@ -63,16 +69,16 @@ class HomeViewModel(
 
     }
 
-    fun onIntent(intent: HomeIntent) {
+    fun onIntent(intent: HomeUiEvent) {
         when (intent) {
-            is HomeIntent.OnCheckInClick -> checkIn()
+            is HomeUiEvent.OnCheckInClick -> checkIn()
         }
     }
 
     private fun startClock() {
         viewModelScope.launch {
             while (true) {
-                _state.update { it.copy(currentTime = getCurrentFormattedTime()) }
+                _uiState.update { it.copy(currentTime = getCurrentFormattedTime()) }
                 delay(1000)
             }
         }
@@ -80,11 +86,11 @@ class HomeViewModel(
 
     private fun checkIn() {
         viewModelScope.launch {
-            _state.update { it.copy(isLoading = true) }
+            _uiState.update { it.copy(isLoading = true) }
             checkInRepository.checkIn()
                 .onSuccess {
-                    _state.update { it.copy(isLoading = false, isCheckedIn = true) }
-                    _effect.emit(HomeEffect.ShowToast("출석이 완료되었습니다."))
+                    _uiState.update { it.copy(isLoading = false, isCheckedIn = true) }
+                    _sideEffect.send(HomeSideEffect.ShowToast("출석이 완료되었습니다."))
 
                     // 출근 기록 성공 시 8시간 30분 후 알림 스케줄링
                     try {
@@ -95,8 +101,12 @@ class HomeViewModel(
                     }
                 }
                 .onFailure { error ->
-                    _state.update { it.copy(isLoading = false, error = error.message) }
-                    _effect.emit(HomeEffect.ShowToast(error.message ?: "알 수 없는 오류가 발생했습니다."))
+                    _uiState.update { it.copy(isLoading = false, error = error.message) }
+                    _sideEffect.send(
+                        HomeSideEffect.ShowToast(
+                            error.message ?: "알 수 없는 오류가 발생했습니다."
+                        )
+                    )
                 }
         }
     }

@@ -114,6 +114,7 @@ kotlin {
 
             implementation(libs.kotlinx.datetime)
 
+            implementation("dev.chrisbanes.haze:haze:1.6.10")
 
         }
         commonTest.dependencies {

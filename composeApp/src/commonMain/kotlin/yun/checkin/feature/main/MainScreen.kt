@@ -49,24 +49,24 @@ internal fun MainContent(
         modifier = modifier.fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.background,
         snackbarHost = { SnackbarHost(snackbarHostState) },
-        bottomBar = {
-            BottomBar(
-                modifier = Modifier.navigationBarsPadding(),
-                tabs = MainTabs.entries,
-                currentTab = currentTab.value?.destination?.route,
-                onClick = {
-                    if (currentTab.value?.destination?.route == it) return@BottomBar
-                    navController.navigate(it) {
-                        // 메인 탭들은 백스택에서 재사용하도록 설정
-                        popUpTo("Home") {
-                            saveState = true
-                        }
-                        launchSingleTop = true
-                        restoreState = true
-                    }
-                }
-            )
-        }
+//        bottomBar = {
+//            BottomBar(
+//                modifier = Modifier.navigationBarsPadding(),
+//                tabs = MainTabs.entries,
+//                currentTab = currentTab.value?.destination?.route,
+//                onClick = {
+//                    if (currentTab.value?.destination?.route == it) return@BottomBar
+//                    navController.navigate(it) {
+//                        // 메인 탭들은 백스택에서 재사용하도록 설정
+//                        popUpTo("Home") {
+//                            saveState = true
+//                        }
+//                        launchSingleTop = true
+//                        restoreState = true
+//                    }
+//                }
+//            )
+//        }
     ) { innerPadding ->
         NavHost(
             navController = navController,

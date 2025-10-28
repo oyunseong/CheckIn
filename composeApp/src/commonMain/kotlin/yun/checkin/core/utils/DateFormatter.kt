@@ -131,4 +131,42 @@ object DateFormatter {
             kotlinx.datetime.DayOfWeek.SUNDAY -> "일"
         }
     }
+
+    fun getDayOfWeekEnglish(dateTime: LocalDateTime): String {
+        return when (dateTime.dayOfWeek) {
+            kotlinx.datetime.DayOfWeek.MONDAY -> "Monday"
+            kotlinx.datetime.DayOfWeek.TUESDAY -> "Tuesday"
+            kotlinx.datetime.DayOfWeek.WEDNESDAY -> "Wednesday"
+            kotlinx.datetime.DayOfWeek.THURSDAY -> "Thursday"
+            kotlinx.datetime.DayOfWeek.FRIDAY -> "Friday"
+            kotlinx.datetime.DayOfWeek.SATURDAY -> "Saturday"
+            kotlinx.datetime.DayOfWeek.SUNDAY -> "Sunday"
+        }
+    }
+
+    fun getMonthEnglish(dateTime: LocalDateTime): String {
+        return when (dateTime.month) {
+            kotlinx.datetime.Month.JANUARY -> "Jan"
+            kotlinx.datetime.Month.FEBRUARY -> "Feb"
+            kotlinx.datetime.Month.MARCH -> "Mar"
+            kotlinx.datetime.Month.APRIL -> "Apr"
+            kotlinx.datetime.Month.MAY -> "May"
+            kotlinx.datetime.Month.JUNE -> "Jun"
+            kotlinx.datetime.Month.JULY -> "Jul"
+            kotlinx.datetime.Month.AUGUST -> "Aug"
+            kotlinx.datetime.Month.SEPTEMBER -> "Sep"
+            kotlinx.datetime.Month.OCTOBER -> "Oct"
+            kotlinx.datetime.Month.NOVEMBER -> "Nov"
+            kotlinx.datetime.Month.DECEMBER -> "Dec"
+        }
+    }
+
+    // 요일, 월 일 포멧
+    fun formatDayOfWeekMonthDay(dateTime: LocalDateTime): String {
+        val dayOfWeek = getDayOfWeekEnglish(dateTime)
+        val month = getMonthEnglish(dateTime)
+        val day = dateTime.day
+
+        return "$dayOfWeek, $month $day"
+    }
 }

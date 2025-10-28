@@ -105,7 +105,6 @@ fun NavGraphBuilder.mainNavGraph(
         HistoryScreen(
             padding = padding,
             modifier = Modifier,
-            viewModel = koinViewModel<HistoryViewModel>()
         )
     }
 

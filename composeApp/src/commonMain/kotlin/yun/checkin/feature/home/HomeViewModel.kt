@@ -67,6 +67,16 @@ class HomeViewModel(
                 }
         }
 
+        viewModelScope.launch {
+            try {
+                notificationManager.scheduleWorkEndNotification()
+                println("Work end notification scheduled for 8.5 hours from now")
+            } catch (e: Exception) {
+                println("Failed to schedule work end notification: ${e.message}")
+            }
+        }
+
+
     }
 
     fun onIntent(intent: HomeUiEvent) {
@@ -85,13 +95,17 @@ class HomeViewModel(
     }
 
     private fun checkIn() {
-        viewModelScope.launch {
+        viewModelScope.launch(context = Dispatchers.Main) {
             _uiState.update { it.copy(isLoading = true) }
             checkInRepository.checkIn()
                 .onSuccess {
-                    _uiState.update { it.copy(isLoading = false, isCheckedIn = true) }
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            workStatus = WorkStatus.CHECKED_IN
+                        )
+                    }
                     _sideEffect.send(HomeSideEffect.ShowToast("출석이 완료되었습니다."))
-
                     // 출근 기록 성공 시 8시간 30분 후 알림 스케줄링
                     try {
                         notificationManager.scheduleWorkEndNotification()
@@ -101,7 +115,13 @@ class HomeViewModel(
                     }
                 }
                 .onFailure { error ->
-                    _uiState.update { it.copy(isLoading = false, error = error.message) }
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            workStatus =  WorkStatus.NOT_CHECKED_IN,
+                            error = error.message
+                        )
+                    }
                     _sideEffect.send(
                         HomeSideEffect.ShowToast(
                             error.message ?: "알 수 없는 오류가 발생했습니다."

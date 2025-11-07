@@ -5,7 +5,6 @@ import androidx.compose.animation.ExitTransition
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
@@ -15,6 +14,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -24,15 +24,12 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
 import yun.checkin.feature.auth.AuthViewModel
 import yun.checkin.feature.history.HistoryScreen
 import yun.checkin.feature.home.HomeScreen
 import yun.checkin.feature.setting.SettingScreen
-
-
-//@Composable
-//expect fun MainScreen(modifier: Modifier = Modifier)
 
 @Composable
 internal fun MainContent(
@@ -40,8 +37,14 @@ internal fun MainContent(
     navController: NavHostController = rememberNavController(),
     authViewModel: AuthViewModel = koinViewModel(),
 ) {
-    val snackbarHostState = remember { SnackbarHostState() }
+    val snackBarHostState = remember { SnackbarHostState() }
     val currentTab = navController.currentBackStackEntryAsState()
+    val coroutineScope = rememberCoroutineScope()
+    val onShowSnackBar: (String) -> Unit = { message ->
+        coroutineScope.launch {
+            snackBarHostState.showSnackbar(message)
+        }
+    }
 
     LaunchedEffect(Unit) {
         navController.currentBackStackEntryFlow.collect {
@@ -52,7 +55,7 @@ internal fun MainContent(
     Scaffold(
         modifier = modifier.fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.background,
-        snackbarHost = { SnackbarHost(snackbarHostState) },
+        snackbarHost = { SnackbarHost(snackBarHostState) },
     ) { innerPadding ->
         NavHost(
             navController = navController,
@@ -65,7 +68,8 @@ internal fun MainContent(
             mainNavGraph(
                 padding = innerPadding,
                 navController = navController,
-                authViewModel = authViewModel
+                authViewModel = authViewModel,
+                onShowSnackBar = onShowSnackBar,
             )
         }
         Box(
@@ -96,6 +100,7 @@ fun NavGraphBuilder.mainNavGraph(
     padding: PaddingValues,
     navController: NavHostController,
     authViewModel: AuthViewModel,
+    onShowSnackBar: (String) -> Unit,
 ) {
     composable(
         route = "Home",
@@ -103,6 +108,7 @@ fun NavGraphBuilder.mainNavGraph(
         HomeScreen(
             padding = padding,
             modifier = Modifier,
+            onShowSnackBar = onShowSnackBar,
         )
     }
 

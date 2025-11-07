@@ -1,5 +1,7 @@
 package yun.checkin.feature.home
 
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -24,8 +26,6 @@ import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import checkin.composeapp.generated.resources.Res
@@ -52,6 +52,7 @@ import yun.checkin.feature.home.model.WorkStatus
 fun HomeScreen(
     modifier: Modifier = Modifier,
     padding: PaddingValues,
+    onShowSnackBar: (String) -> Unit,
     viewModel: HomeViewModel = koinViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -60,7 +61,7 @@ fun HomeScreen(
         viewModel.sideEffect.collectLatest {
             when (it) {
                 is HomeSideEffect.ShowToast -> {
-//                    snackbarHostState.showSnackbar(it.message)
+                    onShowSnackBar.invoke(it.message)
                 }
             }
         }
@@ -86,16 +87,16 @@ fun HomeScreen(
     )
     // 화면 사이즈
 
+    val bottomPadding = animateDpAsState(
+        targetValue = if (state.workStatus == WorkStatus.CHECKED_IN) 150.dp else 0.dp,
+        animationSpec = tween(500)
+    ).value
+
     Box(
         modifier = modifier
             .fillMaxSize()
             .background(
-                brush = Brush.verticalGradient(
-                    colorStops = arrayOf(
-                        0.0f to Color(0xFFccdaec),
-                        1f to Color(0xFFeaeaea)
-                    )
-                )
+                brush = getBackgroundColor(timeOfDay = state.timeOfDay)
             )
             .padding(padding)
     ) {
@@ -124,8 +125,6 @@ fun HomeScreen(
             verticalArrangement = Arrangement.Bottom,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // TODO 화면 사이즈로 가변 처리
-            val bottomPadding = if (state.workStatus == WorkStatus.CHECKED_IN) 100.dp else 0.dp
             Image(
                 painter = painterResource(Res.drawable.ic_sun),
                 contentDescription = null,
@@ -140,7 +139,9 @@ fun HomeScreen(
                         )
                     }
                     .clickable {
-                        onIntent(HomeUiEvent.OnCheckInClick)
+                        if (state.workStatus == WorkStatus.NOT_CHECKED_IN && !state.isLoading) {
+                            onIntent(HomeUiEvent.OnCheckInClick)
+                        }
                     }
             )
             Spacer(
@@ -150,6 +151,27 @@ fun HomeScreen(
         BuildingImage(
             modifier = Modifier.align(Alignment.BottomCenter)
         )
+    }
+}
+
+private fun getBackgroundColor(timeOfDay: TimeOfDay): Brush {
+    return when (timeOfDay) {
+        TimeOfDay.NIGHT -> {
+            Brush.verticalGradient(
+                0f to Color(0xFF202528),
+                1f to Color(0xFF202528),
+            )
+        }
+
+        else -> {
+            Brush.verticalGradient(
+                colorStops = arrayOf(
+                    0.0f to Color(0xFFB3D1FF),
+                    0.8f to Color(0xFFFFE5DD),
+                    1f to Color(0xFFFFE5DD)
+                )
+            )
+        }
     }
 }
 

@@ -51,7 +51,7 @@ data class HomeUiState(
                 in 0..6 -> TimeOfDay.NIGHT       // 0~6시: 밤
                 in 7..9 -> TimeOfDay.MORNING     // 7~9시: 오전
                 in 10..15 -> TimeOfDay.AFTERNOON // 10~15시 (오후 3시): 오후
-                in 16..23 -> TimeOfDay.EVENING   // 16~23시 (오후 4시~11시): 저녁
+                in 16..23 -> TimeOfDay.NIGHT   // 16~23시 (오후 4시~11시): 저녁
                 else -> TimeOfDay.NIGHT
             }
         } catch (e: Exception) {

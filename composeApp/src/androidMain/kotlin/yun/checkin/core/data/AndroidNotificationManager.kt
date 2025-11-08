@@ -29,13 +29,13 @@ class AndroidNotificationManager(
         createNotificationChannel()
     }
 
-    override suspend fun scheduleWorkEndNotification() {
+    override suspend fun scheduleWorkEndNotification(second : Int) {
         // 기존 알림 취소
         cancelAllNotifications()
 
         // 현재 시간에서 8시간 30분 후 시간 계산
         val currentTime = System.currentTimeMillis()
-        val workDurationMillis = (8 * 60 * 60 + 30 * 60) * 1000L // 8시간 30분을 밀리초로 변환
+        val workDurationMillis = second * 1000L // 8시간 30분을 밀리초로 변환
         val triggerTime = currentTime + workDurationMillis
 
         val intent = Intent(context, WorkEndNotificationReceiver::class.java)

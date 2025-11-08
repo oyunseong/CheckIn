@@ -12,12 +12,11 @@ class IOSNotificationManager : NotificationManager {
         requestNotificationPermission()
     }
 
-    override suspend fun scheduleWorkEndNotification() {
+    override suspend fun scheduleWorkEndNotification(second : Int) {
         // 기존 알림 취소
         cancelAllNotifications()
 
-        // 8시간 30분을 초로 계산 (8 * 3600 + 30 * 60 = 30600초)
-        val workHoursInSeconds = 8 * 3600 + 30 * 60
+        val workHoursInSeconds = second
 
         // 알림 콘텐츠 생성
         val content = UNMutableNotificationContent().apply {

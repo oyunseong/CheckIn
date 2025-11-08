@@ -9,7 +9,7 @@ interface NotificationManager {
     /**
      * 퇴근 알림을 스케줄링합니다 (현재 시간으로부터 8시간 30분 후)
      */
-    suspend fun scheduleWorkEndNotification()
+    suspend fun scheduleWorkEndNotification(second : Int)
 
     /**
      * 모든 예약된 알림을 취소합니다

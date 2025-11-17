@@ -1,238 +1,64 @@
 package yun.checkin.feature.home
 
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.graphics.BlendMode
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import checkin.composeapp.generated.resources.Res
-import checkin.composeapp.generated.resources.ic_sun
-import kotlinx.coroutines.flow.collectLatest
-import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
-import org.koin.compose.viewmodel.koinViewModel
-import yun.checkin.core.designsystem.Blue
-import yun.checkin.core.designsystem.Gray
-import yun.checkin.core.designsystem.Orange
-import yun.checkin.core.designsystem.Red
-import yun.checkin.core.designsystem.Yellow
-import yun.checkin.feature.home.component.BuildingImage
-import yun.checkin.feature.home.component.TimeDisplay
-import yun.checkin.feature.home.component.WorkStatusHeader
-import yun.checkin.feature.home.model.HomeSideEffect
-import yun.checkin.feature.home.model.HomeUiEvent
-import yun.checkin.feature.home.model.HomeUiState
-import yun.checkin.feature.home.model.TimeOfDay
-import yun.checkin.feature.home.model.WorkStatus
+import yun.checkin.feature.checkin.CheckInScreen
+import yun.checkin.feature.history.HistoryScreen
+import yun.checkin.feature.setting.SettingScreen
 
 @Composable
 fun HomeScreen(
-    modifier: Modifier = Modifier,
     padding: PaddingValues,
     onShowSnackBar: (String) -> Unit,
-    viewModel: HomeViewModel = koinViewModel(),
 ) {
-    val state by viewModel.uiState.collectAsStateWithLifecycle()
-
-    LaunchedEffect(Unit) {
-        viewModel.sideEffect.collectLatest {
-            when (it) {
-                is HomeSideEffect.ShowToast -> {
-                    onShowSnackBar.invoke(it.message)
-                }
-            }
-        }
-    }
-
-    HomeScreen(
-        modifier = modifier,
-        state = state,
+    HomeScreenContent(
         padding = padding,
-        onIntent = viewModel::onIntent
+        onShowSnackBar = onShowSnackBar
     )
 }
 
 @Composable
-fun HomeScreen(
-    modifier: Modifier = Modifier,
+fun HomeScreenContent(
     padding: PaddingValues = PaddingValues(),
-    state: HomeUiState = HomeUiState(),
-    onIntent: (HomeUiEvent) -> Unit = {}
+    onShowSnackBar: (String) -> Unit = {},
 ) {
-    val textColor = if (state.workStatus == WorkStatus.NOT_CHECKED_IN) Gray else getTextColor(
-        state.timeOfDay
-    )
-    // 화면 사이즈
-
-    val bottomPadding = animateDpAsState(
-        targetValue = if (state.workStatus == WorkStatus.CHECKED_IN) 150.dp else 0.dp,
-        animationSpec = tween(500)
-    ).value
-
-    Box(
-        modifier = modifier
-            .fillMaxSize()
-            .background(
-                brush = getBackgroundColor(timeOfDay = state.timeOfDay)
+    val coroutineScope = rememberCoroutineScope()
+//    val tabs = uiState.tabs
+    val tabs = listOf("1", "2", "3")
+    // 탭 관련 상태
+    val pagerState = rememberPagerState(pageCount = { tabs.size })
+//    val selectedTab = tabs[pagerState.currentPage]
+    HorizontalPager(
+        modifier = Modifier.fillMaxSize(),
+        state = pagerState,
+        verticalAlignment = Alignment.Top,
+    ) { page ->
+        when (page) {
+            0 -> CheckInScreen(
+                padding = padding,
+                onShowSnackBar = onShowSnackBar
             )
-            .padding(padding)
-    ) {
-        Column() {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                Spacer(modifier = Modifier.height(94.dp))
-                WorkStatusHeader(
-                    workStatus = state.workStatus,
-                    textColor = textColor
-                )
-                Spacer(modifier = Modifier.height(38.dp))
-                TimeDisplay(
-                    time = state.currentTime,
-                    textColor = textColor
-                )
-            }
-        }
 
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.Bottom,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Image(
-                painter = painterResource(Res.drawable.ic_sun),
-                contentDescription = null,
-                modifier = Modifier
-                    .size(186.dp)
-                    .clip(CircleShape)
-                    .drawWithContent {
-                        drawContent()
-                        drawRect(
-                            getSunColor(state.timeOfDay),
-                            blendMode = BlendMode.SrcAtop
-                        )
-                    }
-                    .clickable {
-                        if (state.workStatus == WorkStatus.NOT_CHECKED_IN && !state.isLoading) {
-                            onIntent(HomeUiEvent.OnCheckInClick)
-                        }
-                    }
+            1 -> HistoryScreen(
+                padding = padding
             )
-            Spacer(
-                modifier = Modifier.height(bottomPadding + 81.dp)
-            )
-        }
-        BuildingImage(
-            modifier = Modifier.align(Alignment.BottomCenter)
-        )
-    }
-}
 
-private fun getBackgroundColor(timeOfDay: TimeOfDay): Brush {
-    return when (timeOfDay) {
-        TimeOfDay.NIGHT -> {
-            Brush.verticalGradient(
-                0f to Color(0xFF202528),
-                1f to Color(0xFF202528),
-            )
-        }
-
-        else -> {
-            Brush.verticalGradient(
-                colorStops = arrayOf(
-                    0.0f to Color(0xFFB3D1FF),
-                    0.8f to Color(0xFFFFE5DD),
-                    1f to Color(0xFFFFE5DD)
-                )
+            2 -> SettingScreen(
+                padding = padding
             )
         }
     }
 }
 
-
-fun getTextColor(timeOfDay: TimeOfDay): Color {
-    return when (timeOfDay) {
-        TimeOfDay.NIGHT -> Yellow
-        TimeOfDay.MORNING -> Red
-        TimeOfDay.AFTERNOON -> Orange
-        TimeOfDay.EVENING -> Blue
-    }
-}
-
-fun getSunColor(timeOfDay: TimeOfDay): Brush {
-    return when (timeOfDay) {
-        TimeOfDay.NIGHT -> Brush.verticalGradient(
-            colorStops = arrayOf(
-                0f to Color(0xFFFFEFB4),       // 나머지는 그레이
-                0.2f to Color(0xFFFFDB59),      // 20% 지점에서 그레이로 변경
-                1f to Color(0xFF816D27)      // 상단 색상
-            ),
-            startY = 0f,
-        )
-
-        TimeOfDay.MORNING -> {
-            Brush.verticalGradient(
-                colorStops = arrayOf(
-                    0.0f to Red,
-                    1f to Red
-                ),
-                startY = 0f,
-            )
-        }
-
-        TimeOfDay.AFTERNOON -> {
-            Brush.verticalGradient(
-                colorStops = arrayOf(
-                    0.0f to Orange,
-                    1f to Orange
-                ),
-                startY = 0f,
-            )
-        }
-
-        TimeOfDay.EVENING -> {
-            Brush.verticalGradient(
-                colorStops = arrayOf(
-                    0.0f to Orange,
-                    1f to Orange
-                ),
-                startY = 0f,
-            )
-        }
-    }
-}
-
-
-@Preview()
+@Preview
 @Composable
-private fun Preview() {
-    MaterialTheme {
-        HomeScreen()
-    }
+fun HomeScreenPreview() {
+    HomeScreenContent()
 }

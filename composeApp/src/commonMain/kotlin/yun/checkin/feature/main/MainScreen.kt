@@ -29,6 +29,7 @@ import org.koin.compose.viewmodel.koinViewModel
 import yun.checkin.feature.auth.AuthViewModel
 import yun.checkin.feature.history.HistoryScreen
 import yun.checkin.feature.checkin.CheckInScreen
+import yun.checkin.feature.home.HomeScreen
 import yun.checkin.feature.setting.SettingScreen
 
 @Composable
@@ -72,27 +73,27 @@ internal fun MainContent(
                 onShowSnackBar = onShowSnackBar,
             )
         }
-        Box(
-            modifier = Modifier.fillMaxSize().padding(end = 22.dp, bottom = 19.dp),
-            contentAlignment = Alignment.BottomEnd
-        ) {
-            BottomNavigator(
-                modifier = Modifier.navigationBarsPadding(),
-                tabs = MainTabs.entries,
-                currentTab = currentTab.value?.destination?.route,
-                onClick = {
-                    if (currentTab.value?.destination?.route == it) return@BottomNavigator
-                    navController.navigate(it) {
-                        // 메인 탭들은 백스택에서 재사용하도록 설정
-                        popUpTo("Home") {
-                            saveState = true
-                        }
-                        launchSingleTop = true
-                        restoreState = true
-                    }
-                }
-            )
-        }
+//        Box(
+//            modifier = Modifier.fillMaxSize().padding(end = 22.dp, bottom = 19.dp),
+//            contentAlignment = Alignment.BottomEnd
+//        ) {
+//            BottomNavigator(
+//                modifier = Modifier.navigationBarsPadding(),
+//                tabs = MainTabs.entries,
+//                currentTab = currentTab.value?.destination?.route,
+//                onClick = {
+//                    if (currentTab.value?.destination?.route == it) return@BottomNavigator
+//                    navController.navigate(it) {
+//                        // 메인 탭들은 백스택에서 재사용하도록 설정
+//                        popUpTo("Home") {
+//                            saveState = true
+//                        }
+//                        launchSingleTop = true
+//                        restoreState = true
+//                    }
+//                }
+//            )
+//        }
     }
 }
 
@@ -102,8 +103,18 @@ fun NavGraphBuilder.mainNavGraph(
     authViewModel: AuthViewModel,
     onShowSnackBar: (String) -> Unit,
 ) {
+
     composable(
-        route = "Home",
+        route = "Home"
+    ) {
+        HomeScreen(
+            padding = padding,
+            onShowSnackBar = onShowSnackBar,
+        )
+    }
+
+    composable(
+        route = "CheckIn",
     ) {
         CheckInScreen(
             padding = padding,

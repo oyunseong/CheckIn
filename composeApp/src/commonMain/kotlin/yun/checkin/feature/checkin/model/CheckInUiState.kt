@@ -1,4 +1,4 @@
-package yun.checkin.feature.home.model
+package yun.checkin.feature.checkin.model
 
 /**
  * 시간대를 나타내는 enum

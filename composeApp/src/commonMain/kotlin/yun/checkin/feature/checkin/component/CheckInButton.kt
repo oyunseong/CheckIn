@@ -1,4 +1,4 @@
-package yun.checkin.feature.home.component
+package yun.checkin.feature.checkin.component
 
 
 import androidx.compose.animation.core.animateFloatAsState

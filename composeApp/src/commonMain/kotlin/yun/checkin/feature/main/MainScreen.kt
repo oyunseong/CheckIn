@@ -28,7 +28,7 @@ import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
 import yun.checkin.feature.auth.AuthViewModel
 import yun.checkin.feature.history.HistoryScreen
-import yun.checkin.feature.home.HomeScreen
+import yun.checkin.feature.checkin.CheckInScreen
 import yun.checkin.feature.setting.SettingScreen
 
 @Composable
@@ -105,7 +105,7 @@ fun NavGraphBuilder.mainNavGraph(
     composable(
         route = "Home",
     ) {
-        HomeScreen(
+        CheckInScreen(
             padding = padding,
             modifier = Modifier,
             onShowSnackBar = onShowSnackBar,

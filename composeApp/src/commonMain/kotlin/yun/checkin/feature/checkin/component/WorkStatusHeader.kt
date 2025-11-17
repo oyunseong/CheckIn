@@ -1,4 +1,4 @@
-package yun.checkin.feature.home.component
+package yun.checkin.feature.checkin.component
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -17,7 +17,7 @@ import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import yun.checkin.core.designsystem.Gray
 import yun.checkin.core.utils.DateFormatter
-import yun.checkin.feature.home.model.WorkStatus
+import yun.checkin.feature.checkin.model.WorkStatus
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 

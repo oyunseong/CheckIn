@@ -1,4 +1,4 @@
-package yun.checkin.feature.home
+package yun.checkin.feature.checkin
 
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -13,13 +13,13 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import yun.checkin.core.data_api.CheckInRepository
 import yun.checkin.core.data_api.NotificationManager
-import yun.checkin.feature.home.model.HomeSideEffect
-import yun.checkin.feature.home.model.HomeUiEvent
-import yun.checkin.feature.home.model.HomeUiState
-import yun.checkin.feature.home.model.WorkStatus
+import yun.checkin.feature.checkin.model.CheckInSideEffect
+import yun.checkin.feature.checkin.model.CheckInUiEvent
+import yun.checkin.feature.checkin.model.HomeUiState
+import yun.checkin.feature.checkin.model.WorkStatus
 import yun.checkin.util.getCurrentFormattedTime
 
-class HomeViewModel(
+class CheckInViewModel(
     private val checkInRepository: CheckInRepository,
     private val notificationManager: NotificationManager
 ) : ViewModel() {
@@ -27,7 +27,7 @@ class HomeViewModel(
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState = _uiState.asStateFlow()
 
-    private val _sideEffect = Channel<HomeSideEffect>()
+    private val _sideEffect = Channel<CheckInSideEffect>()
     val sideEffect = _sideEffect.receiveAsFlow()
 
     private val viewModelScope = CoroutineScope(Dispatchers.Default)
@@ -68,9 +68,9 @@ class HomeViewModel(
         }
     }
 
-    fun onIntent(intent: HomeUiEvent) {
+    fun onIntent(intent: CheckInUiEvent) {
         when (intent) {
-            is HomeUiEvent.OnCheckInClick -> checkIn()
+            is CheckInUiEvent.OnCheckInClick -> checkIn()
         }
     }
 
@@ -94,7 +94,7 @@ class HomeViewModel(
                             workStatus = WorkStatus.CHECKED_IN
                         )
                     }
-                    _sideEffect.send(HomeSideEffect.ShowToast("출석이 완료되었습니다."))
+                    _sideEffect.send(CheckInSideEffect.ShowToast("출석이 완료되었습니다."))
                     // 출근 기록 성공 시 8시간 30분 후 알림 스케줄링
                     try {
                         notificationManager.scheduleWorkEndNotification(8 * 60 * 60 + 30 * 60)
@@ -112,7 +112,7 @@ class HomeViewModel(
                         )
                     }
                     _sideEffect.send(
-                        HomeSideEffect.ShowToast(
+                        CheckInSideEffect.ShowToast(
                             error.message ?: "알 수 없는 오류가 발생했습니다."
                         )
                     )

@@ -20,7 +20,7 @@ import yun.checkin.feature.auth.AuthViewModel
 import yun.checkin.feature.auth.LoginScreen
 import yun.checkin.feature.auth.SignUpScreen
 import yun.checkin.feature.history.HistoryViewModel
-import yun.checkin.feature.home.HomeViewModel
+import yun.checkin.feature.checkin.CheckInViewModel
 import yun.checkin.feature.main.MainContent
 
 @Composable
@@ -98,7 +98,7 @@ internal val appModule = module {
     single<CheckInRepository> { CheckInRepositoryImpl(get(), get()) }
 
     single<AuthRepository> { AuthRepositoryImpl() }
-    viewModelOf(::HomeViewModel)
+    viewModelOf(::CheckInViewModel)
     viewModelOf(::HistoryViewModel)
     viewModelOf(::AppViewModel)
     viewModelOf(::AuthViewModel)

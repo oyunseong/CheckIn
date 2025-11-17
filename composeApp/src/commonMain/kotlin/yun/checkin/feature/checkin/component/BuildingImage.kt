@@ -1,4 +1,4 @@
-package yun.checkin.feature.home.component
+package yun.checkin.feature.checkin.component
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background

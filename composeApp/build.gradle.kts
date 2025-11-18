@@ -4,6 +4,8 @@ import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
+import java.util.Properties
+import java.io.FileInputStream
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -14,6 +16,14 @@ plugins {
     alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.googleServices)
 }
+
+// Read Teams webhook URL from local.properties
+val localProperties = Properties()
+val localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.inputStream().use { localProperties.load(it) }
+}
+val teamsWebhookUrl: String? = localProperties.getProperty("teams.webhook.url", "")
 
 kotlin {
     androidTarget {
@@ -92,6 +102,9 @@ kotlin {
             implementation(libs.firebase.auth)
             implementation(libs.firebase.firestore)
             implementation(libs.firebase.messaging)
+
+            // Ktor client for Android
+            implementation(libs.ktor.client.cio)
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -116,6 +129,11 @@ kotlin {
 
             implementation("dev.chrisbanes.haze:haze:1.6.10")
 
+            // Ktor client
+            implementation(libs.ktor.client.core)
+            implementation(libs.ktor.client.contentNegotiation)
+            implementation(libs.ktor.client.logging)
+            implementation(libs.ktor.serialization.json)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -125,7 +143,8 @@ kotlin {
             implementation(libs.kotlinx.coroutinesSwing)
         }
         iosMain.dependencies {
-
+            // Ktor client for iOS - Darwin engine uses native URLSession
+            implementation(libs.ktor.client.darwin)
         }
     }
 }
@@ -172,6 +191,13 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+
+        // Add Teams webhook URL to BuildConfig
+        buildConfigField("String", "TEAMS_WEBHOOK_URL", "\"$teamsWebhookUrl\"")
+    }
+
+    buildFeatures {
+        buildConfig = true
     }
 
     packaging {

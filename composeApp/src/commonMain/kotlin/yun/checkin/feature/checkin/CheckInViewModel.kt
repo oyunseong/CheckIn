@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import yun.checkin.core.data_api.CheckInRepository
 import yun.checkin.core.data_api.NotificationManager
+import yun.checkin.core.data_api.TeamsWebhookService
 import yun.checkin.feature.checkin.model.CheckInSideEffect
 import yun.checkin.feature.checkin.model.CheckInUiEvent
 import yun.checkin.feature.checkin.model.HomeUiState
@@ -21,7 +22,8 @@ import yun.checkin.util.getCurrentFormattedTime
 
 class CheckInViewModel(
     private val checkInRepository: CheckInRepository,
-    private val notificationManager: NotificationManager
+    private val notificationManager: NotificationManager,
+    private val teamsWebhookService: TeamsWebhookService
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HomeUiState())
@@ -70,7 +72,7 @@ class CheckInViewModel(
 
     fun onIntent(intent: CheckInUiEvent) {
         when (intent) {
-            is CheckInUiEvent.OnCheckInClick -> checkIn()
+            is CheckInUiEvent.OnCheckInClick -> checkIn(userName = "userName")
         }
     }
 
@@ -83,7 +85,7 @@ class CheckInViewModel(
         }
     }
 
-    private fun checkIn() {
+    private fun checkIn(userName: String) {
         viewModelScope.launch(context = Dispatchers.Main) {
             _uiState.update { it.copy(isLoading = true) }
             checkInRepository.checkIn()
@@ -95,19 +97,20 @@ class CheckInViewModel(
                         )
                     }
                     _sideEffect.send(CheckInSideEffect.ShowToast("출석이 완료되었습니다."))
-                    // 출근 기록 성공 시 8시간 30분 후 알림 스케줄링
-                    try {
-                        notificationManager.scheduleWorkEndNotification(8 * 60 * 60 + 30 * 60)
-                        println("Work end notification scheduled for 8.5 hours from now")
-                    } catch (e: Exception) {
-                        println("Failed to schedule work end notification: ${e.message}")
-                    }
+
+
+                    notifyWorkEnd(time = 8 * 60 * 60 + 30 * 60)
+
+                    sendMessageAtTeams(
+                        name = userName,
+                        text = "일하세요"
+                    )
                 }
                 .onFailure { error ->
                     _uiState.update {
                         it.copy(
                             isLoading = false,
-                            workStatus =  WorkStatus.NOT_CHECKED_IN,
+                            workStatus = WorkStatus.NOT_CHECKED_IN,
                             error = error.message
                         )
                     }
@@ -117,6 +120,35 @@ class CheckInViewModel(
                         )
                     )
                 }
+        }
+    }
+
+    private suspend fun notifyWorkEnd(time: Long) {
+        // 출근 기록 성공 시 8시간 30분 후 알림 스케줄링 // TODO 함수
+        try {
+            notificationManager.scheduleWorkEndNotification(time.toInt())
+            println("Work end notification scheduled for 8.5 hours from now")
+        } catch (e: Exception) {
+            println("Failed to schedule work end notification: ${e.message}")
+        }
+    }
+
+    // Teams 웹훅으로 메시지 전송
+    private suspend fun sendMessageAtTeams(
+        name: String,
+        text: String
+    ) {
+        try {
+            teamsWebhookService.sendMessage(
+                name = name,
+                text = text
+            ).onSuccess {
+                println("Teams notification sent successfully")
+            }.onFailure { error ->
+                println("Failed to send Teams notification: ${error.message}")
+            }
+        } catch (e: Exception) {
+            println("Exception while sending Teams notification: ${e.message}")
         }
     }
 }

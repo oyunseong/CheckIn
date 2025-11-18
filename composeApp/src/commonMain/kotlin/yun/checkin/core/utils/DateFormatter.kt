@@ -1,10 +1,15 @@
 package yun.checkin.core.utils
 
+import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
+import kotlin.time.ExperimentalTime
 
 /**
  * 날짜 포맷팅을 위한 유틸리티 객체
  */
+@OptIn(ExperimentalTime::class)
 object DateFormatter {
 
     /**
@@ -73,8 +78,9 @@ object DateFormatter {
         val dateStr = toKoreanDate(dateTime)
         val hour = dateTime.hour.toString().padStart(2, '0')
         val minute = dateTime.minute.toString().padStart(2, '0')
+        val second = dateTime.second.toString().padStart(2, '0')
 
-        return "$dateStr $hour:$minute"
+        return "$dateStr $hour:$minute:$second"
     }
 
     /**
@@ -168,5 +174,35 @@ object DateFormatter {
         val day = dateTime.day
 
         return "$dayOfWeek, $month $day"
+    }
+
+    /**
+     * Epoch milliseconds를 "yyyy년 MM월 dd일 HH:mm" 포맷으로 변환
+     * @param epochMillis Unix timestamp in milliseconds
+     * @param timeZone 타임존 (기본값: 시스템 타임존)
+     * @return 예: 2025년 09월 29일 14:30
+     */
+    fun fromEpochMillisToKoreanDateTime(
+        epochMillis: Long,
+        timeZone: TimeZone = TimeZone.currentSystemDefault()
+    ): String {
+        val instant = Instant.fromEpochMilliseconds(epochMillis)
+        val dateTime = instant.toLocalDateTime(timeZone)
+        return toKoreanDateTime(dateTime)
+    }
+
+    /**
+     * Epoch seconds를 "yyyy년 MM월 dd일 HH:mm" 포맷으로 변환
+     * @param epochSeconds Unix timestamp in seconds
+     * @param timeZone 타임존 (기본값: 시스템 타임존)
+     * @return 예: 2025년 09월 29일 14:30
+     */
+    fun fromEpochSecondsToKoreanDateTime(
+        epochSeconds: Long,
+        timeZone: TimeZone = TimeZone.currentSystemDefault()
+    ): String {
+        val instant = Instant.fromEpochSeconds(epochSeconds)
+        val dateTime = instant.toLocalDateTime(timeZone)
+        return toKoreanDateTime(dateTime)
     }
 }

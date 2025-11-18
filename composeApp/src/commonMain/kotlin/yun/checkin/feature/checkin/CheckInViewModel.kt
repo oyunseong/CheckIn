@@ -14,12 +14,16 @@ import kotlinx.coroutines.launch
 import yun.checkin.core.data_api.CheckInRepository
 import yun.checkin.core.data_api.NotificationManager
 import yun.checkin.core.data_api.TeamsWebhookService
+import yun.checkin.core.utils.DateFormatter
 import yun.checkin.feature.checkin.model.CheckInSideEffect
 import yun.checkin.feature.checkin.model.CheckInUiEvent
 import yun.checkin.feature.checkin.model.HomeUiState
 import yun.checkin.feature.checkin.model.WorkStatus
 import yun.checkin.util.getCurrentFormattedTime
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
+@OptIn(ExperimentalTime::class)
 class CheckInViewModel(
     private val checkInRepository: CheckInRepository,
     private val notificationManager: NotificationManager,
@@ -34,7 +38,7 @@ class CheckInViewModel(
 
     private val viewModelScope = CoroutineScope(Dispatchers.Default)
 
-    private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
+    private val coroutineExceptionHandler = CoroutineExceptionHandler { _, throwable ->
         // 여기에 예외가 잡힙니다!
         println("exceptionHandler : " + throwable.message)
 
@@ -46,7 +50,7 @@ class CheckInViewModel(
     init {
         startClock()
 
-        viewModelScope.launch(exceptionHandler) {
+        viewModelScope.launch(coroutineExceptionHandler) {
             checkInRepository.isCheckIn()
                 .onSuccess { result ->
                     _uiState.update {
@@ -72,7 +76,7 @@ class CheckInViewModel(
 
     fun onIntent(intent: CheckInUiEvent) {
         when (intent) {
-            is CheckInUiEvent.OnCheckInClick -> checkIn(userName = "userName")
+            is CheckInUiEvent.OnCheckInClick -> checkIn(userName = "오윤성")
         }
     }
 
@@ -85,8 +89,9 @@ class CheckInViewModel(
         }
     }
 
+    @OptIn(ExperimentalTime::class)
     private fun checkIn(userName: String) {
-        viewModelScope.launch(context = Dispatchers.Main) {
+        viewModelScope.launch(coroutineExceptionHandler) {
             _uiState.update { it.copy(isLoading = true) }
             checkInRepository.checkIn()
                 .onSuccess {
@@ -101,9 +106,12 @@ class CheckInViewModel(
 
                     notifyWorkEnd(time = 8 * 60 * 60 + 30 * 60)
 
+                    val current = Clock.System.now().toEpochMilliseconds()
+                    val convertTimeFormat = DateFormatter.fromEpochMillisToKoreanDateTime(current)
+
                     sendMessageAtTeams(
                         name = userName,
-                        text = "일하세요"
+                        text = convertTimeFormat
                     )
                 }
                 .onFailure { error ->
@@ -124,10 +132,8 @@ class CheckInViewModel(
     }
 
     private suspend fun notifyWorkEnd(time: Long) {
-        // 출근 기록 성공 시 8시간 30분 후 알림 스케줄링 // TODO 함수
         try {
             notificationManager.scheduleWorkEndNotification(time.toInt())
-            println("Work end notification scheduled for 8.5 hours from now")
         } catch (e: Exception) {
             println("Failed to schedule work end notification: ${e.message}")
         }

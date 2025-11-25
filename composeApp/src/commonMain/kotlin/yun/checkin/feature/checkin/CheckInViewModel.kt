@@ -119,7 +119,7 @@ class CheckInViewModel(
                             workStatus = WorkStatus.CHECKED_IN
                         )
                     }
-                    _sideEffect.send(CheckInSideEffect.ShowToast("출석이 완료되었습니다."))
+                    _sideEffect.send(CheckInSideEffect.ShowToast("출근이 완료되었습니다."))
 
 
                     notifyWorkEnd(time = 8 * 60 * 60 + 30 * 60)

@@ -5,6 +5,7 @@ import kotlinx.datetime.toLocalDateTime
 import yun.checkin.FirebaseAuth
 import yun.checkin.FirebaseFirestore
 import yun.checkin.core.data_api.AttendanceRecord
+import yun.checkin.core.data_api.AttendanceType
 import yun.checkin.core.data_api.CheckInRepository
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
@@ -98,13 +99,19 @@ class CheckInRepositoryImpl(
             val attendanceRecords = documentsResult.mapNotNull { doc ->
                 val attendanceTimeMillis = doc["attendance_time"] as? Long
                 val userIdFromDoc = doc["user_id"] as? String
+                val typeString = doc["type"] as? String
 
                 if (attendanceTimeMillis != null && userIdFromDoc != null) {
                     val attendanceTime = Instant.fromEpochMilliseconds(attendanceTimeMillis)
                         .toLocalDateTime(currentSystemDefault())
+                    val type = when (typeString) {
+                        "check_out" -> AttendanceType.CHECK_OUT
+                        else -> AttendanceType.CHECK_IN
+                    }
                     AttendanceRecord(
                         attendanceTime = attendanceTime,
-                        userId = userIdFromDoc
+                        userId = userIdFromDoc,
+                        type = type
                     )
                 } else null
             }.sortedByDescending { it.attendanceTime }

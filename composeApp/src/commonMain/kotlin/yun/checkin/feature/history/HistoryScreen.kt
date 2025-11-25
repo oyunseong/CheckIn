@@ -35,6 +35,7 @@ import kotlinx.datetime.format.FormatStringsInDatetimeFormats
 import kotlinx.datetime.format.byUnicodePattern
 import org.koin.compose.viewmodel.koinViewModel
 import yun.checkin.core.data_api.AttendanceRecord
+import yun.checkin.core.data_api.AttendanceType
 import yun.checkin.feature.history.model.HistoryUiEvent
 import yun.checkin.feature.history.model.HistoryUiState
 
@@ -74,7 +75,7 @@ internal fun HistoryScreenContent(
                 .background(MaterialTheme.colorScheme.background)
         ) {
             Text(
-                text = "출석 기록",
+                text = "출퇴근 기록",
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(16.dp)
@@ -108,7 +109,7 @@ internal fun HistoryScreenContent(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "출석 기록이 없습니다",
+                            text = "출퇴근 기록이 없습니다",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -175,15 +176,24 @@ private fun AttendanceRecordItem(
             Box(
                 modifier = Modifier
                     .background(
-                        color = MaterialTheme.colorScheme.primaryContainer,
+                        color = when (record.type) {
+                            AttendanceType.CHECK_IN -> MaterialTheme.colorScheme.primaryContainer
+                            AttendanceType.CHECK_OUT -> MaterialTheme.colorScheme.tertiaryContainer
+                        },
                         shape = RoundedCornerShape(20.dp)
                     )
                     .padding(horizontal = 12.dp, vertical = 6.dp)
             ) {
                 Text(
-                    text = "출석",
+                    text = when (record.type) {
+                        AttendanceType.CHECK_IN -> "출근"
+                        AttendanceType.CHECK_OUT -> "퇴근"
+                    },
                     style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    color = when (record.type) {
+                        AttendanceType.CHECK_IN -> MaterialTheme.colorScheme.onPrimaryContainer
+                        AttendanceType.CHECK_OUT -> MaterialTheme.colorScheme.onTertiaryContainer
+                    },
                     fontWeight = FontWeight.Medium
                 )
             }

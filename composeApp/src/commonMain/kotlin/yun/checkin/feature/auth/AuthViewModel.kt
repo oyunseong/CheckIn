@@ -73,18 +73,18 @@ class AuthViewModel(
     }
 
     /**
-     * 이메일과 비밀번호로 회원가입
+     * 이메일, 비밀번호, 이름으로 회원가입
      */
-    fun signUp(email: String, password: String) {
-        if (email.isBlank() || password.isBlank()) {
-            _uiState.value = _uiState.value.copy(errorMessage = "이메일과 비밀번호를 모두 입력해주세요.")
+    fun signUp(email: String, password: String, name: String) {
+        if (email.isBlank() || password.isBlank() || name.isBlank()) {
+            _uiState.value = _uiState.value.copy(errorMessage = "모든 항목을 입력해주세요.")
             return
         }
 
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
 
-            when (val result = authRepository.signUpWithEmail(email, password)) {
+            when (val result = authRepository.signUpWithEmail(email, password, name)) {
                 is AuthResult.Success -> {
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,

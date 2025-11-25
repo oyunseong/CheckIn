@@ -27,7 +27,8 @@ import kotlin.time.ExperimentalTime
 class CheckInViewModel(
     private val checkInRepository: CheckInRepository,
     private val notificationManager: NotificationManager,
-    private val teamsWebhookService: TeamsWebhookService
+    private val teamsWebhookService: TeamsWebhookService,
+    private val authRepository: yun.checkin.core.data_api.AuthRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HomeUiState())
@@ -76,7 +77,9 @@ class CheckInViewModel(
 
     fun onIntent(intent: CheckInUiEvent) {
         when (intent) {
-            is CheckInUiEvent.OnCheckInClick -> checkIn(userName = "오윤성")
+            is CheckInUiEvent.OnCheckInClick -> {
+                checkIn()
+            }
         }
     }
 
@@ -90,7 +93,7 @@ class CheckInViewModel(
     }
 
     @OptIn(ExperimentalTime::class)
-    private fun checkIn(userName: String) {
+    private fun checkIn() {
         viewModelScope.launch(coroutineExceptionHandler) {
             _uiState.update { it.copy(isLoading = true) }
             checkInRepository.checkIn()
@@ -109,10 +112,15 @@ class CheckInViewModel(
                     val current = Clock.System.now().toEpochMilliseconds()
                     val convertTimeFormat = DateFormatter.fromEpochMillisToKoreanDateTime(current)
 
-                    sendMessageAtTeams(
-                        name = userName,
-                        text = convertTimeFormat
-                    )
+                    authRepository.getCurrentUser()?.let {
+                        if(authRepository.isUserInGroup(it.uid)){
+                            sendMessageAtTeams(
+                                name = it.name ?: "Unknown",
+                                text = convertTimeFormat
+                            )
+                        }
+                    }
+
                 }
                 .onFailure { error ->
                     _uiState.update {

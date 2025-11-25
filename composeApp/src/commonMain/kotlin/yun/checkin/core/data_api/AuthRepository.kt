@@ -13,7 +13,8 @@ sealed class AuthResult {
  */
 data class User(
     val uid: String,
-    val email: String?
+    val email: String? = null,
+    val name: String? = null
 )
 
 /**
@@ -31,9 +32,9 @@ interface AuthRepository {
     suspend fun signInWithEmail(email: String, password: String): AuthResult
 
     /**
-     * 이메일과 비밀번호로 회원가입
+     * 이메일, 비밀번호, 이름으로 회원가입
      */
-    suspend fun signUpWithEmail(email: String, password: String): AuthResult
+    suspend fun signUpWithEmail(email: String, password: String, name: String): AuthResult
 
     /**
      * 로그아웃
@@ -44,4 +45,19 @@ interface AuthRepository {
      * 현재 사용자가 로그인되어 있는지 확인
      */
     suspend fun isSignedIn(): Boolean
+
+    /**
+     * 사용자 이름 저장
+     */
+    suspend fun saveUserName(uid: String, name: String): Result<Unit>
+
+    /**
+     * 사용자 이름 가져오기
+     */
+    suspend fun getUserName(uid: String): Result<String?>
+
+    /**
+     * 그룹에
+     */
+    suspend fun isUserInGroup(uid : String) : Boolean
 }

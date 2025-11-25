@@ -22,6 +22,7 @@ fun SignUpScreen(
     onSignUpSuccess: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
@@ -60,6 +61,17 @@ fun SignUpScreen(
         )
 
         OutlinedTextField(
+            value = name,
+            onValueChange = { name = it },
+            label = { Text("이름") },
+            singleLine = true,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp),
+            enabled = !uiState.isLoading
+        )
+
+        OutlinedTextField(
             value = email,
             onValueChange = { email = it },
             label = { Text("이메일") },
@@ -85,7 +97,7 @@ fun SignUpScreen(
         )
 
         Button(
-            onClick = { viewModel.signUp(email, password) },
+            onClick = { viewModel.signUp(email, password, name) },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(50.dp),

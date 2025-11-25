@@ -20,6 +20,7 @@ fun SettingScreen(
     modifier: Modifier = Modifier,
     padding: PaddingValues,
     viewModel: AuthViewModel = koinViewModel(),
+    onLogout: () -> Unit = {},
 ) {
     Column(
         modifier = modifier
@@ -35,7 +36,9 @@ fun SettingScreen(
             modifier = Modifier.padding(16.dp)
         )
         Button(
-            onClick = { viewModel.signOut() },
+            onClick = {
+                onLogout()
+            },
             modifier = Modifier.padding(16.dp)
         ) {
             Text("로그아웃")

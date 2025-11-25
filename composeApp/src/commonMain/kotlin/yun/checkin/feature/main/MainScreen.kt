@@ -37,6 +37,7 @@ internal fun MainContent(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
     authViewModel: AuthViewModel = koinViewModel(),
+    onLogout: () -> Unit = {},
 ) {
     val snackBarHostState = remember { SnackbarHostState() }
     val currentTab = navController.currentBackStackEntryAsState()
@@ -71,6 +72,7 @@ internal fun MainContent(
                 navController = navController,
                 authViewModel = authViewModel,
                 onShowSnackBar = onShowSnackBar,
+                onLogout = onLogout,
             )
         }
 //        Box(
@@ -102,6 +104,7 @@ fun NavGraphBuilder.mainNavGraph(
     navController: NavHostController,
     authViewModel: AuthViewModel,
     onShowSnackBar: (String) -> Unit,
+    onLogout: () -> Unit,
 ) {
 
     composable(
@@ -110,6 +113,7 @@ fun NavGraphBuilder.mainNavGraph(
         HomeScreen(
             padding = padding,
             onShowSnackBar = onShowSnackBar,
+            onLogout = onLogout
         )
     }
 
@@ -142,7 +146,8 @@ fun NavGraphBuilder.mainNavGraph(
         SettingScreen(
             modifier = Modifier,
             padding = padding,
-            viewModel = authViewModel
+            viewModel = authViewModel,
+            onLogout = onLogout
         )
     }
 }

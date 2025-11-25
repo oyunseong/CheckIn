@@ -318,7 +318,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"iosApp/Preview Content\"";
-				DEVELOPMENT_TEAM = QMKVL8J29Y;
+				DEVELOPMENT_TEAM = 63C95HS393;
 				ENABLE_PREVIEWS = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -338,7 +338,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1;
-				PRODUCT_BUNDLE_IDENTIFIER = yun.checkin.CheckIn;
+				PRODUCT_BUNDLE_IDENTIFIER = vw.checkin.CheckIn;
 				PRODUCT_NAME = CheckIn;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -356,7 +356,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"iosApp/Preview Content\"";
-				DEVELOPMENT_TEAM = QMKVL8J29Y;
+				DEVELOPMENT_TEAM = 63C95HS393;
 				ENABLE_PREVIEWS = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -376,7 +376,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1;
-				PRODUCT_BUNDLE_IDENTIFIER = yun.checkin.CheckIn;
+				PRODUCT_BUNDLE_IDENTIFIER = vw.checkin.CheckIn;
 				PRODUCT_NAME = CheckIn;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;

@@ -83,7 +83,18 @@ internal fun App(
             }
 
             composable("main") {
-                MainContent(authViewModel = authViewModel)
+                MainContent(
+                    authViewModel = authViewModel,
+                    onLogout = {
+                        // 로그아웃 처리
+                        authViewModel.signOut()
+                        // 백스택을 모두 제거하고 로그인 화면으로 이동
+                        navController.navigate("login") {
+                            popUpTo(0) { inclusive = true }
+                            launchSingleTop = true
+                        }
+                    }
+                )
             }
         }
     }
@@ -94,10 +105,11 @@ internal val appModule = module {
     single { FirebaseFirestore() }
     single { FirebaseAuth() }
 
-    // CheckInRepositoryImpl에 의존성 주입
+    // Repository들 등록
     single<CheckInRepository> { CheckInRepositoryImpl(get(), get()) }
+    single<AuthRepository> { AuthRepositoryImpl(get()) }
 
-    single<AuthRepository> { AuthRepositoryImpl() }
+    // ViewModel들 등록
     viewModelOf(::CheckInViewModel)
     viewModelOf(::HistoryViewModel)
     viewModelOf(::AppViewModel)

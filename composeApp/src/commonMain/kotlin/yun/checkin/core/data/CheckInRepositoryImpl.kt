@@ -23,7 +23,28 @@ class CheckInRepositoryImpl(
             collection = "user_attendance",
             data = mapOf(
                 "user_id" to uuid,
-                "attendance_time" to currentTime
+                "attendance_time" to currentTime,
+                "type" to "check_in"
+            )
+        )
+
+        return if (saveResult.isSuccess) {
+            Result.success(Unit)
+        } else {
+            Result.failure(saveResult.exceptionOrNull()!!)
+        }
+    }
+
+    override suspend fun checkOut(): Result<Unit> {
+        val uuid = firebaseAuth.getCurrentUUID()
+            ?: return Result.failure(IllegalStateException("User not logged in"))
+        val currentTime = Clock.System.now().epochSeconds * 1000
+        val saveResult = firestore.saveData(
+            collection = "user_attendance",
+            data = mapOf(
+                "user_id" to uuid,
+                "attendance_time" to currentTime,
+                "type" to "check_out"
             )
         )
 

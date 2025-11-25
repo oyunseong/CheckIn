@@ -15,7 +15,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -139,8 +142,16 @@ fun CheckInScreen(
                         )
                     }
                     .clickable {
-                        if (state.workStatus == WorkStatus.NOT_CHECKED_IN && !state.isLoading) {
-                            onIntent(CheckInUiEvent.OnCheckInClick)
+                        if (!state.isLoading) {
+                            when (state.workStatus) {
+                                WorkStatus.NOT_CHECKED_IN -> {
+                                    onIntent(CheckInUiEvent.OnCheckInClick)
+                                }
+
+                                WorkStatus.CHECKED_IN -> {
+                                    onIntent(CheckInUiEvent.OnCheckOutClick)
+                                }
+                            }
                         }
                     }
             )
@@ -151,6 +162,33 @@ fun CheckInScreen(
         BuildingImage(
             modifier = Modifier.align(Alignment.BottomCenter)
         )
+
+        // 퇴근 확인 다이얼로그
+        if (state.showCheckOutDialog) {
+            AlertDialog(
+                onDismissRequest = { onIntent(CheckInUiEvent.OnCheckOutCancel) },
+                title = {
+                    Text(text = "퇴근 확인")
+                },
+                text = {
+                    Text(text = "퇴근하시겠습니까?")
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = { onIntent(CheckInUiEvent.OnCheckOutConfirm) }
+                    ) {
+                        Text("확인")
+                    }
+                },
+                dismissButton = {
+                    TextButton(
+                        onClick = { onIntent(CheckInUiEvent.OnCheckOutCancel) }
+                    ) {
+                        Text("취소")
+                    }
+                }
+            )
+        }
     }
 }
 

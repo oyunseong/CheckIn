@@ -21,11 +21,12 @@ class TeamsWebhookServiceImpl(
     private val httpClient: HttpClient
 ) : TeamsWebhookService {
 
-    override suspend fun sendMessage(name: String, text: String): Result<Unit> {
+    override suspend fun sendMessage(name: String, text: String, isCheckIn: Boolean): Result<Unit> {
         return try {
             val message = TeamsWebhookMessage(
                 name = name,
-                text = text
+                text = text,
+                isCheckIn = isCheckIn
             )
 
             println("📤 Teams Webhook 요청 시작")

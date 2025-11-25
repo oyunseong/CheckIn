@@ -80,6 +80,21 @@ class CheckInViewModel(
             is CheckInUiEvent.OnCheckInClick -> {
                 checkIn()
             }
+            is CheckInUiEvent.OnCheckOutClick -> {
+                // 퇴근 확인 다이얼로그 표시
+                _uiState.update { it.copy(showCheckOutDialog = true) }
+            }
+
+            is CheckInUiEvent.OnCheckOutConfirm -> {
+                // 다이얼로그 닫고 퇴근 처리
+                _uiState.update { it.copy(showCheckOutDialog = false) }
+                checkOut()
+            }
+
+            is CheckInUiEvent.OnCheckOutCancel -> {
+                // 다이얼로그 닫기
+                _uiState.update { it.copy(showCheckOutDialog = false) }
+            }
         }
     }
 
@@ -116,7 +131,8 @@ class CheckInViewModel(
                         if(authRepository.isUserInGroup(it.uid)){
                             sendMessageAtTeams(
                                 name = it.name ?: "Unknown",
-                                text = convertTimeFormat
+                                text = convertTimeFormat,
+                                isCheckIn = true
                             )
                         }
                     }
@@ -127,6 +143,49 @@ class CheckInViewModel(
                         it.copy(
                             isLoading = false,
                             workStatus = WorkStatus.NOT_CHECKED_IN,
+                            error = error.message
+                        )
+                    }
+                    _sideEffect.send(
+                        CheckInSideEffect.ShowToast(
+                            error.message ?: "알 수 없는 오류가 발생했습니다."
+                        )
+                    )
+                }
+        }
+    }
+
+    @OptIn(ExperimentalTime::class)
+    private fun checkOut() {
+        viewModelScope.launch(coroutineExceptionHandler) {
+            _uiState.update { it.copy(isLoading = true) }
+            checkInRepository.checkOut()
+                .onSuccess {
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            workStatus = WorkStatus.NOT_CHECKED_IN
+                        )
+                    }
+                    _sideEffect.send(CheckInSideEffect.ShowToast("퇴근이 완료되었습니다."))
+
+                    val current = Clock.System.now().toEpochMilliseconds()
+                    val convertTimeFormat = DateFormatter.fromEpochMillisToKoreanDateTime(current)
+
+                    authRepository.getCurrentUser()?.let {
+                        if (authRepository.isUserInGroup(it.uid)) {
+                            sendMessageAtTeams(
+                                name = it.name ?: "Unknown",
+                                text = convertTimeFormat,
+                                isCheckIn = false
+                            )
+                        }
+                    }
+                }
+                .onFailure { error ->
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
                             error = error.message
                         )
                     }
@@ -150,12 +209,14 @@ class CheckInViewModel(
     // Teams 웹훅으로 메시지 전송
     private suspend fun sendMessageAtTeams(
         name: String,
-        text: String
+        text: String,
+        isCheckIn: Boolean
     ) {
         try {
             teamsWebhookService.sendMessage(
                 name = name,
-                text = text
+                text = text,
+                isCheckIn = isCheckIn
             ).onSuccess {
                 println("Teams notification sent successfully")
             }.onFailure { error ->

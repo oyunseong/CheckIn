@@ -40,7 +40,8 @@ data class HomeUiState(
     val currentTime: String = "00:00:00",
     val workStatus: WorkStatus = WorkStatus.NOT_CHECKED_IN,
 //    val timeOfDay: TimeOfDay = TimeOfDay.NIGHT,
-    val error: String? = null
+    val error: String? = null,
+    val showCheckOutDialog: Boolean = false
 ) {
     val timeOfDay: TimeOfDay = getTimeOfDay(currentTime)
 
